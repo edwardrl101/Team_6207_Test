@@ -17,8 +17,11 @@ export default function Index() {
   }
 
   return (
+    <SafeAreaView style = {styles.background}>
     <ImageBackground source = {require('../assets/images/trees-background.png')} style = {styles.background}>
+
       <SafeAreaView style = {styles.bodyContainer}>
+
         <View style = {styles.headerTitle}>
         <View>
       <Text style = {styles.titleText}>HocusFocus</Text>
@@ -26,13 +29,16 @@ export default function Index() {
       </View>
       <Image source = {require('../assets/images/clouds.png')} style = {styles.headerImage}></Image>
       </View>
+
       <Text style = {styles.signinText}>Sign in</Text>
+
       <Text style = {styles.Label}>Email</Text>
       <TextInput 
       style = {styles.form} 
       placeholder = "Enter your email" 
       value = {email} 
       onChangeText = {setEmail}/>
+
       <Text style = {styles.Label}>Password</Text>
       <TextInput 
       style = {styles.form} 
@@ -40,13 +46,16 @@ export default function Index() {
       secureTextEntry 
       value = {password} 
       onChangeText = {setPassword}/>
+
       </SafeAreaView>
+
       <TouchableOpacity>
       <Text style = {styles.forgetText}>Forgot password?</Text>
       </TouchableOpacity>
-       <TouchableOpacity style = {styles.loginButton} onPress = {() => console.log("Pressed")}>
+      <TouchableOpacity style = {styles.loginButton} onPress = {() => console.log("Pressed")}>
         <Text style = {styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
+
       <Link href = "/signup" asChild>
       <TouchableOpacity>
       <Text style = {styles.createAccountText}>Not a member yet? 
@@ -54,7 +63,9 @@ export default function Index() {
       </Text>
       </TouchableOpacity>
       </Link>
+
     </ImageBackground>
+    </SafeAreaView>
   );
 }
 
