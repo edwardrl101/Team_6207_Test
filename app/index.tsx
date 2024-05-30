@@ -1,14 +1,20 @@
-import { Text, View, StyleSheet, Image, ImageBackground, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView } from "react-native";
+import { Text, View, StyleSheet, Image, ImageBackground, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Button } from "react-native";
 import { useFonts } from 'expo-font'
 import { useState } from "react";
+import { Link } from 'expo-router';
 
 export default function Index() {
   const [fontsLoaded] = useFonts({
     'Oswald': require('../assets/fonts/Oswald-Bold.ttf'),
     'Bigelow': require('../assets/fonts/BigelowRules-Regular.ttf')
   });
-  const[email, setEmail] = useState("");
-  const[password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let errors = {};
+  }
 
   return (
     <ImageBackground source = {require('../assets/images/trees-background.png')} style = {styles.background}>
@@ -38,14 +44,16 @@ export default function Index() {
       <TouchableOpacity>
       <Text style = {styles.forgetText}>Forgot password?</Text>
       </TouchableOpacity>
-      <TouchableOpacity style = {styles.loginButton} onPress = {() => console.log("Pressed")}>
+       <TouchableOpacity style = {styles.loginButton} onPress = {() => console.log("Pressed")}>
         <Text style = {styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
+      <Link href = "/signup" asChild>
       <TouchableOpacity>
       <Text style = {styles.createAccountText}>Not a member yet? 
       <Text style = {styles.forgetText}> Sign up now!</Text>
       </Text>
       </TouchableOpacity>
+      </Link>
     </ImageBackground>
   );
 }
@@ -55,7 +63,7 @@ const styles = StyleSheet.create ({
     flex: 1,
   },
   bodyContainer: {
-    paddingHorizontal:60,
+    paddingHorizontal:40,
   },
   titleText: {
     fontSize: 52,
@@ -98,7 +106,7 @@ const styles = StyleSheet.create ({
     paddingTop: 2,
     color: "#F9DFAD",
     textAlign: "right",
-    width: "85%",
+    width: "89%",
     fontWeight: "500",
   },
   loginButton: {
@@ -106,7 +114,7 @@ const styles = StyleSheet.create ({
     marginTop: 35,
     padding: 10,
     alignSelf: "center",
-    width: "70%",
+    width: "80%",
     borderRadius: 10,
     shadowColor: "black",
     shadowOffset: {
