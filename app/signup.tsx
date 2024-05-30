@@ -1,11 +1,32 @@
 import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView } from "react-native"
 import { useState } from "react"
+import { supabase } from "./client"
 
 export default function signup() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    
+    async function handleSubmit() {
+      console.log("SIGN UP Pressed")
+      try{
+        const { data, error } = await supabase.auth.signUp(
+          {
+            email: email,
+            password: password, //check if password match
+            options: {
+              data: {
+                username: username,
+              }
+            }
+          }
+        )
+        alert("Confirmation email sent")
+      } catch (error) {
+        alert(error)
+      }
+    }
+    
     return (
         <SafeAreaView style = {styles.container}>
             <Text style = {styles.titleText}>HocusFocus</Text>
