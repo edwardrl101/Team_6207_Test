@@ -2,6 +2,7 @@ import { Text, View, StyleSheet, Image, ImageBackground, TextInput, TouchableOpa
 import { useFonts } from 'expo-font'
 import { useState } from "react";
 import { Link } from 'expo-router';
+import { supabase } from "./client"
 
 export default function Index() {
   const [fontsLoaded] = useFonts({
@@ -15,7 +16,22 @@ export default function Index() {
   const validateForm = () => {
     let errors = {};
   }
-
+  async function handleSubmit() {
+    console.log("LOG IN Pressed")
+    try{
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      })
+      if (error) throw error
+      console.log(data)
+      alert("Successful")
+    }
+    catch(error){
+      alert(error);
+    }
+  }
+  
   return (
     <SafeAreaView style = {styles.background}>
     <ImageBackground source = {require('../assets/images/trees-background.png')} style = {styles.background}>
