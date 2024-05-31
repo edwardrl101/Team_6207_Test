@@ -32,12 +32,17 @@ export default function signup() {
       setPassword("");
       setConfirmation("");
       setErrors({});
-      console.log("SIGN UP Pressed")
+      
+      if (password != confirmation) {
+        alert("Passwords do not match")
+        return
+      }
+
       try{
         const { data, error } = await supabase.auth.signUp(
           {
             email: email,
-            password: password, //check if password match
+            password: password,
             options: {
               data: {
                 username: username,
@@ -45,6 +50,7 @@ export default function signup() {
             }
           }
         )
+        if (error) throw error
         alert("Confirmation email sent")
       } catch (error) {
         alert(error)
