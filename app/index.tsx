@@ -68,7 +68,7 @@ export default function Index() {
       <TouchableOpacity>
       <Text style = {styles.forgetText}>Forgot password?</Text>
       </TouchableOpacity>
-      <TouchableOpacity style = {styles.loginButton} onPress = {() => console.log("Pressed")}>
+      <TouchableOpacity style = {styles.loginButton} onPress = {() => handleSubmit()}>
         <Text style = {styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
 
