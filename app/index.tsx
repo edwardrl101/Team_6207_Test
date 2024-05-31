@@ -2,6 +2,7 @@ import { Text, View, StyleSheet, Image, ImageBackground, TextInput, TouchableOpa
 import { useFonts } from 'expo-font'
 import { useState } from "react";
 import { Link } from 'expo-router';
+import { AuthButton } from '../components/styles/styles'
 import { supabase } from "./client"
 
 export default function Index() {
@@ -9,14 +10,29 @@ export default function Index() {
     'Oswald': require('../assets/fonts/Oswald-Bold.ttf'),
     'Bigelow': require('../assets/fonts/BigelowRules-Regular.ttf')
   });
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     let errors = {};
+    if(!email) errors.email = "Email is required";
+    if(!password) errors.password = "Password is required";
+
+    setErrors(errors);
+
+    return Object.keys(errors).length === 0;
   }
+
   async function handleSubmit() {
+    if(!validateForm()) {
+      return;
+    }
+      console.log("Submitted", email, password);
+      setEmail("");
+      setPassword("");
+      setErrors({});
     console.log("LOG IN Pressed")
     try{
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -25,13 +41,13 @@ export default function Index() {
       })
       if (error) throw error
       console.log(data)
-      alert("Successful")
+      alert("Successful") 
     }
     catch(error){
       alert(error);
     }
   }
-  
+
   return (
     <SafeAreaView style = {styles.background}>
     <ImageBackground source = {require('../assets/images/trees-background.png')} style = {styles.background}>
@@ -55,6 +71,10 @@ export default function Index() {
       value = {email} 
       onChangeText = {setEmail}/>
 
+      {
+        errors.email ? <Text style = {styles.errorText}>{errors.email}</Text> : null
+      }
+
       <Text style = {styles.Label}>Password</Text>
       <TextInput 
       style = {styles.form} 
@@ -63,17 +83,18 @@ export default function Index() {
       value = {password} 
       onChangeText = {setPassword}/>
 
+      {
+        errors.password ? <Text style = {styles.errorText}>{errors.password}</Text> : null
+      }
+
       </SafeAreaView>
 
-      <TouchableOpacity>
-      <Text style = {styles.forgetText}>Forgot password?</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style = {styles.loginButton} onPress = {() => handleSubmit()}>
-        <Text style = {styles.loginText}>LOGIN</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style = {styles.authButton} onPress = {handleSubmit}>
+            <Text style = {styles.authText}>LOGIN</Text>
+        </TouchableOpacity>
 
       <Link href = "/signup" asChild>
-      <TouchableOpacity>
+      <TouchableOpacity onPress = {() => setErrors({})}>
       <Text style = {styles.createAccountText}>Not a member yet? 
       <Text style = {styles.forgetText}> Sign up now!</Text>
       </Text>
@@ -107,6 +128,7 @@ const styles = StyleSheet.create ({
     color : "white",
     paddingTop: 20,
     fontSize: 20,
+    fontWeight: "500"
   },
   Label: {
     color: "#BFBFBF",
@@ -136,26 +158,6 @@ const styles = StyleSheet.create ({
     width: "89%",
     fontWeight: "500",
   },
-  loginButton: {
-    backgroundColor: "#F9DFAD",
-    marginTop: 35,
-    padding: 10,
-    alignSelf: "center",
-    width: "80%",
-    borderRadius: 10,
-    shadowColor: "black",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  loginText: {
-    color: "#828282",
-    textAlign: "center",
-  },
   createAccountText: {
     paddingTop: 10,
     color: "white",
@@ -172,6 +174,26 @@ const styles = StyleSheet.create ({
   },
   errorText: {
     color: "red",
-    marginBottom: 10,
-  }
+  },
+  authButton: {
+    backgroundColor: "#F9DFAD",
+    marginTop: 35,
+    padding: 10,
+    alignSelf: "center",
+    width: "80%",
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  authText: {
+    color: "#828282",
+    textAlign: "center",
+    fontWeight: "bold"
+  },
 });
