@@ -37,6 +37,12 @@ export default function signup() {
         alert("Passwords do not match")
         return
       }
+      
+      const { data, error } = await supabase.rpc('is_email_exist', { mail: email })
+      if (data) {
+        alert("Email entered already exists")
+        return
+      }
 
       try{
         const { data, error } = await supabase.auth.signUp(
@@ -50,7 +56,7 @@ export default function signup() {
             }
           }
         )
-        if (error) throw error
+
         alert("Confirmation email sent")
       } catch (error) {
         alert(error)
