@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, ActivityIndicator } from "react-native"
 import { useState } from "react"
-import { AuthButton } from '../components/styles/styles'
 import { supabase } from './client'
 
 export default function signup() {
@@ -8,6 +7,7 @@ export default function signup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmation, setConfirmation] = useState("");
+    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     const validateForm = () => {
@@ -23,7 +23,9 @@ export default function signup() {
     }
 
     async function handleSubmit() {
+      setLoading(true);
       if(!validateForm()) {
+        setLoading(false);
         return;
       }
       console.log("Submitted", username, email, password, confirmation);
@@ -35,12 +37,14 @@ export default function signup() {
       
       if (password != confirmation) {
         alert("Passwords do not match")
+        setLoading(false);
         return
       }
       
       const { data, error } = await supabase.rpc('is_email_exist', { mail: email })
       if (data) {
         alert("Email entered already exists")
+        setLoading(false);
         return
       }
 
@@ -61,13 +65,14 @@ export default function signup() {
       } catch (error) {
         alert(error)
       }
+      setLoading(false);
     }
 
     return (
         <SafeAreaView style = {styles.container}>
 
             <Text style = {styles.titleText}>HocusFocus</Text>
-            <Text style = {styles.WelcomeText}>Tis the beginning of your journey...</Text>
+            <Text style = {styles.WelcomeText}>Tis' the beginning of your journey...</Text>
 
             <KeyboardAvoidingView behavior="padding" style = {styles.bodyContainer}>
 
@@ -123,9 +128,12 @@ export default function signup() {
 
              </KeyboardAvoidingView>
 
-             <TouchableOpacity style = {styles.authButton} onPress = {() => handleSubmit()}>
+             {
+             loading ? (<ActivityIndicator size = "large" color = "#0000ff"></ActivityIndicator>) : (
+            <TouchableOpacity style = {styles.authButton} onPress = {() => handleSubmit()}>
             <Text style = {styles.authText}>SIGN UP</Text>
             </TouchableOpacity>
+             )}
 
         </SafeAreaView>
     )
