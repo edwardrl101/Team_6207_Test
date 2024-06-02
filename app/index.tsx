@@ -1,18 +1,16 @@
-import { Text, View, StyleSheet, Image, ImageBackground, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Button } from "react-native";
+import { Text, View, StyleSheet, Image, ImageBackground, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, ActivityIndicator } from "react-native";
 import { useFonts } from 'expo-font'
 import { useState } from "react";
-import { Link } from 'expo-router';
-import { AuthButton } from '../components/styles/styles'
+import { Link, useRouter } from 'expo-router';
 import { supabase } from "./client"
 
 export default function Index() {
-  const [fontsLoaded] = useFonts({
-    'Oswald': require('../assets/fonts/Oswald-Bold.ttf'),
-    'Bigelow': require('../assets/fonts/BigelowRules-Regular.ttf')
-  });
+
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -26,7 +24,10 @@ export default function Index() {
   }
 
   async function handleSubmit() {
+
+    setLoading(true);
     if(!validateForm()) {
+      setLoading(false);
       return;
     }
       console.log("Submitted", email, password);
@@ -40,12 +41,14 @@ export default function Index() {
         password: password,
       })
       if (error) throw error
-      console.log(data)
-      alert("Successful") 
+      console.log(data);
+      alert("Successful");
+      router.push("/signup"); 
     }
     catch(error){
       alert(error);
     }
+    setLoading(false);
   }
 
   return (
@@ -57,14 +60,14 @@ export default function Index() {
         <View style = {styles.headerTitle}>
         <View>
       <Text style = {styles.titleText}>HocusFocus</Text>
-      <Text style ={styles.WelcomeText}>Welcome to your kingdom...</Text>
+      <Text style ={styles.welcomeText}>Welcome to your kingdom...</Text>
       </View>
       <Image source = {require('../assets/images/clouds.png')} style = {styles.headerImage}></Image>
       </View>
 
       <Text style = {styles.signinText}>Sign in</Text>
 
-      <Text style = {styles.Label}>Email</Text>
+      <Text style = {styles.label}>Email</Text>
       <TextInput 
       style = {styles.form} 
       placeholder = "Enter your email" 
@@ -75,7 +78,7 @@ export default function Index() {
         errors.email ? <Text style = {styles.errorText}>{errors.email}</Text> : null
       }
 
-      <Text style = {styles.Label}>Password</Text>
+      <Text style = {styles.label}>Password</Text>
       <TextInput 
       style = {styles.form} 
       placeholder = "Enter your password" 
@@ -89,9 +92,19 @@ export default function Index() {
 
       </SafeAreaView>
 
-      <TouchableOpacity style = {styles.authButton} onPress = {handleSubmit}>
+      <Link href = "/forgetpassword" asChild>
+      <TouchableOpacity onPress = {() => setErrors({})}>
+      <Text style = {styles.forgetText}>Forgot password?</Text>
+      </TouchableOpacity>
+      </Link>
+
+      {
+        loading ? (
+          <ActivityIndicator size = "large" color = "#0000ff"></ActivityIndicator>) : (
+            <TouchableOpacity style = {styles.authButton} onPress = {handleSubmit}>
             <Text style = {styles.authText}>LOGIN</Text>
-        </TouchableOpacity>
+            </TouchableOpacity>
+          )}
 
       <Link href = "/signup" asChild>
       <TouchableOpacity onPress = {() => setErrors({})}>
@@ -119,7 +132,7 @@ const styles = StyleSheet.create ({
     color: "white",
     paddingTop: 60,
   },
-  WelcomeText: {
+  welcomeText: {
     color : "white", 
     fontStyle: 'italic', 
     fontSize: 15,
@@ -130,7 +143,7 @@ const styles = StyleSheet.create ({
     fontSize: 20,
     fontWeight: "500"
   },
-  Label: {
+  label: {
     color: "#BFBFBF",
     paddingTop: 10,
   },
