@@ -14,7 +14,7 @@ This is the GitHub Repository of our team, HocusFocus (Team 6207)
 4. Similarly, to be able to open the app in iOS on your Mac OS, visit the following link for instructions to set up the iOS Simulator. This will be used to open the app in iOS on your computer.
    The link can be found here: (https://docs.expo.dev/get-started/set-up-your-environment/?platform=ios&device=simulated#set-up-an-ios-simulator-with-expo-go)
 
-5. Type in the command `npm run android` to open the app in Android or `npm run ios` to open the app in iOS.
+5. In the termiinal, type in the command `npm run android` to open the app in Android or `npm run ios` to open the app in iOS.
 
 6. Run the app and try out the sign in/register feature with authentication.
 
