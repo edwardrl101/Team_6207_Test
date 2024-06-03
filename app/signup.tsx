@@ -1,8 +1,14 @@
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, ActivityIndicator } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, 
+  TextInput, TouchableOpacity, KeyboardAvoidingView, 
+  ActivityIndicator, ScrollView, Image } from "react-native"
 import { useState } from "react"
-import { supabase } from './client'
+import { supabase } from '../app/client'
+import { useRouter, Link } from 'expo-router'
+import BackArrow from "@/components/styles/BackArrow"
 
 export default function signup() {
+    const router = useRouter();
+
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -34,25 +40,25 @@ export default function signup() {
       setPassword("");
       setConfirmation("");
       setErrors({});
-      
-      if (password != confirmation) {
+
+      if(password != confirmation) {
         alert("Passwords do not match")
         setLoading(false);
         return
       }
-      
+
       const { data, error } = await supabase.rpc('is_email_exist', { mail: email })
       if (data) {
         alert("Email entered already exists")
         setLoading(false);
         return
       }
-
+      
       try{
         const { data, error } = await supabase.auth.signUp(
           {
             email: email,
-            password: password,
+            password: password, //check if password match
             options: {
               data: {
                 username: username,
@@ -60,8 +66,9 @@ export default function signup() {
             }
           }
         )
-
-        alert("Confirmation email sent")
+        if(error) throw error
+        alert("Confirmation email sent! Click the link in your email to activate your account.")
+        router.push("/confirmation")
       } catch (error) {
         alert(error)
       }
@@ -70,6 +77,14 @@ export default function signup() {
 
     return (
         <SafeAreaView style = {styles.container}>
+
+          <Link href = "/login" asChild>
+            <TouchableOpacity onPress = {() => setErrors({})}>
+              <BackArrow></BackArrow>
+          </TouchableOpacity>
+          </Link>
+          
+          <ScrollView> 
 
             <Text style = {styles.titleText}>HocusFocus</Text>
             <Text style = {styles.WelcomeText}>Tis' the beginning of your journey...</Text>
@@ -86,7 +101,8 @@ export default function signup() {
              onChangeText = {setUsername}/>
 
              {
-             errors.username ? <Text style = {styles.errorText}>{errors.username}</Text> : null
+             errors.username ? <Text style = {styles.errorText}>{errors.username}</Text> : null // display the error message
+             // if nothing is typed in
              }
 
              <Text style = {styles.Label}>Email</Text>
@@ -97,7 +113,8 @@ export default function signup() {
              onChangeText = {setEmail}/>
 
              {
-             errors.email ? <Text style = {styles.errorText}>{errors.email}</Text> : null
+             errors.email ? <Text style = {styles.errorText}>{errors.email}</Text> : null // display the error message
+             // if nothing is typed in
              }
 
              <Text style = {styles.Label}>Password</Text>
@@ -110,7 +127,8 @@ export default function signup() {
              />
 
              {
-             errors.password ? <Text style = {styles.errorText}>{errors.password}</Text> : null
+             errors.password ? <Text style = {styles.errorText}>{errors.password}</Text> : null // display the error message
+             // if nothing is typed in
              }
 
              <Text style = {styles.Label}>Confirm Password</Text>
@@ -123,7 +141,8 @@ export default function signup() {
              />
 
              {
-             errors.confirmation ? <Text style = {styles.errorText}>{errors.confirmation}</Text> : null
+             errors.confirmation ? <Text style = {styles.errorText}>{errors.confirmation}</Text> : null // display the error
+             // message if nothing is typed in
              }
 
              </KeyboardAvoidingView>
@@ -134,7 +153,7 @@ export default function signup() {
             <Text style = {styles.authText}>SIGN UP</Text>
             </TouchableOpacity>
              )}
-
+             </ScrollView>
         </SafeAreaView>
     )
 }
@@ -149,7 +168,7 @@ const styles = StyleSheet.create ({
         fontSize: 52,
         color: "white",
         textAlign: "center",
-        paddingTop: 40
+        paddingTop: 20
     },
     WelcomeText: {
         color : "white", 
@@ -211,4 +230,11 @@ const styles = StyleSheet.create ({
       errorText: {
         color: "red",
       },
+      backArrow: {
+        height: 30,
+        width: 30,
+        marginTop: 20,
+        marginHorizontal: 10
+      }
+     
 })
