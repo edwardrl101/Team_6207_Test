@@ -34,7 +34,7 @@ export default function forgetpassword() {
       
       try{
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: 'http://localhost:8081/confirmation',
+          redirectTo: 'http://localhost:8081/resetpassword',
         }
       )
         if(error) throw error
