@@ -33,14 +33,17 @@ export default function forgetpassword() {
       }
       
       try{
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: 'http://localhost:8081/confirmation',
+        }
+      )
         if(error) throw error
-        alert("Coming soon")
+        alert("Reset password email sent! Click the link in your email to reset your password.")
       } catch (error) {
         alert(error)
       }
       setLoading(false);
     }
-
 
     return(
         <SafeAreaView style = {styles.background}>
