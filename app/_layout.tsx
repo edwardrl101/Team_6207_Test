@@ -8,7 +8,8 @@ export default function RootLayout() {
   });
 
   return (
-    <Stack screenOptions = {{headerShown : false}}>
+    // test
+    <Stack screenOptions = {{headerShown: false}}> 
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(screens)"/>
     </Stack>

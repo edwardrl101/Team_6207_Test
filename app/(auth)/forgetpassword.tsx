@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, Image, ImageBackground, TextInput, SafeAreaView, TouchableOpacity, KeyboardAvoidingView } from 'react-native'
 import { useState } from 'react'
-import { supabase } from '../app/client'
+import { Link } from 'expo-router'
+import { supabase } from '@/app/(auth)/client'
+import BackArrow from "@/components/styles/BackArrow"
 
 export default function forgetpassword() {
 
@@ -47,10 +49,19 @@ export default function forgetpassword() {
 
     return(
         <SafeAreaView style = {styles.background}>
-        <ImageBackground source = {require('../assets/images/woods.png')} style = {styles.background}>
+          
+        <ImageBackground source = {require('@/assets/images/woods.png')} style = {styles.background}>
 
-        <Image source = {require('../assets/images/lock.png')} style = {styles.lock}></Image>
-        
+        <Link href = "/login" asChild>
+            <TouchableOpacity onPress = {() => setErrors({})}>
+              <BackArrow></BackArrow>
+          </TouchableOpacity>
+          </Link>
+
+    
+        <Image source = {require('@/assets/images/lock.png')} style = {styles.lock}></Image>
+       
+
         <Text style = {styles.titleText}>FORGOT YOUR PASSWORD?</Text>
         <Text style = {styles.message}>Fear not! We can help...</Text>
 
@@ -65,6 +76,11 @@ export default function forgetpassword() {
         value = {email}
         onChangeText = {setEmail}>
         </TextInput>
+
+        {
+        errors.email ? <Text style = {styles.errorText}>{errors.email}</Text> : null
+      }
+
         </KeyboardAvoidingView>
 
         <TouchableOpacity style = {styles.authButton}>
@@ -150,5 +166,8 @@ const styles = StyleSheet.create({
         color: "#828282",
         textAlign: "center",
         fontWeight: "bold"
+      },
+      errorText: {
+        color: "red",
       },
 })

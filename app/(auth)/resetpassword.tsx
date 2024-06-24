@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, SafeAreaView,
     TextInput, TouchableOpacity, KeyboardAvoidingView, 
     ActivityIndicator, ScrollView, Image } from "react-native"
 import { useState } from 'react'
-import { supabase } from '../app/client'
+import { supabase } from '@/app/(auth)/client'
 
 export default function forgetpassword() {
     const [email, setEmail] = useState("");
