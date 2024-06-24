@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native'
 
-export default function Friends() {
+export default function Home() {
     return(
         <View>
-        <Text>Hello there! This is easdmpty for now..</Text>
+        <Text>Hello there! This is empty for now..</Text>
         </View>
     )
 }

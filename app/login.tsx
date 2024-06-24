@@ -2,7 +2,7 @@ import { Text, View, StyleSheet, Image, ImageBackground,
   TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from "react-native"
 import { useState, } from "react"
 import { Link, useRouter} from 'expo-router'
-import { supabase } from './client'
+import { supabase } from "./client"
 
 export default function Login() {
 
@@ -55,7 +55,7 @@ export default function Login() {
 
   return (
     <SafeAreaView style = {styles.background}>
-    <ImageBackground source = {require('@/assets/images/trees-background.png')} style = {styles.background}>
+    <ImageBackground source = {require('../assets/images/trees-background.png')} style = {styles.background}>
 
       <SafeAreaView style = {styles.bodyContainer}>
 
@@ -64,7 +64,7 @@ export default function Login() {
       <Text style = {styles.titleText}>HocusFocus</Text>
       <Text style ={styles.WelcomeText}>Welcome to your kingdom...</Text>
       </View>
-      <Image source = {require('@/assets/images/clouds.png')} style = {styles.headerImage}></Image>
+      <Image source = {require('../assets/images/clouds.png')} style = {styles.headerImage}></Image>
       </View>
 
       <Text style = {styles.signinText}>Sign in</Text>
