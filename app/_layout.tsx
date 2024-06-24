@@ -8,10 +8,9 @@ export default function RootLayout() {
   });
 
   return (
-    <Stack>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="signup"/>
-      <Stack.Screen name="forgetpassword"/>
+    <Stack screenOptions = {{headerShown : false}}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(screens)"/>
     </Stack>
   );
 }

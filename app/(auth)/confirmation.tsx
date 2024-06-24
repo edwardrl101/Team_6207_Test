@@ -6,14 +6,14 @@ import BackArrow from '@/components/styles/BackArrow'
 export default function Confirmation() {
     return(
         <SafeAreaView style = {styles.background}>
-            <ImageBackground source = {require('../assets/images/woods.png')} style = {styles.background}>
+            <ImageBackground source = {require('@/assets/images/woods.png')} style = {styles.background}>
 
             <Link href = "/signup" asChild>
             <TouchableOpacity>
               <BackArrow></BackArrow>
           </TouchableOpacity>
           </Link>
-            <Image source = {require('../assets/images/email.png')} style = {styles.email}></Image>
+            <Image source = {require('@/assets/images/email.png')} style = {styles.email}></Image>
 
             <Text style = {styles.titleText}>AUTHENTICATION</Text>
             <Text style = {styles.message}>Confirm your sign-up...</Text>
