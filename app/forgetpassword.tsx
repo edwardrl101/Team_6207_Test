@@ -1,9 +1,49 @@
 import { View, Text, StyleSheet, Image, ImageBackground, TextInput, SafeAreaView, TouchableOpacity, KeyboardAvoidingView } from 'react-native'
 import { useState } from 'react'
+import { supabase } from '../app/client'
 
 export default function forgetpassword() {
 
     const [email, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+      let errors = {};
+      if(!email) errors.email = "Email is required";
+      setErrors(errors);
+  
+      return Object.keys(errors).length === 0;
+    }
+    async function handleSubmit() {
+      setLoading(true);
+      if(!validateForm()) {
+        setLoading(false);
+        return;
+      }
+      console.log("Sent", email);
+      setEmail("");
+      setErrors({});
+
+      const { data, error } = await supabase.rpc('is_email_exist', { mail: email })
+      if (!data) {
+        alert("No user with email entered")
+        setLoading(false);
+        return
+      }
+      
+      try{
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: 'http://localhost:8081/resetpassword',
+        }
+      )
+        if(error) throw error
+        alert("Reset password email sent! Click the link in your email to reset your password.")
+      } catch (error) {
+        alert(error)
+      }
+      setLoading(false);
+    }
 
     return(
         <SafeAreaView style = {styles.background}>
@@ -28,7 +68,7 @@ export default function forgetpassword() {
         </KeyboardAvoidingView>
 
         <TouchableOpacity style = {styles.authButton}>
-        <Text style = {styles.authText}>SEND</Text>
+        <Text style = {styles.authText} onPress = {() => handleSubmit()}>SEND</Text>
         </TouchableOpacity>
         
         </ImageBackground>
