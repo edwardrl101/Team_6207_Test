@@ -8,6 +8,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
   const [text, setText] = useState(task ? task.task : '');
   const [dueDate, setDueDate] = useState(task ? new Date(task.dueDate) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   useEffect(() => {
     if(task) {
@@ -27,6 +28,12 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
     const currentDate = selectedDate || dueDate;
     setShowDatePicker(false);
     setDueDate(currentDate);
+  };
+
+  const onTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || dueDate;
+    setShowTimePicker(false);
+    setDueDate(currentTime);
   };
 
   return (
@@ -61,7 +68,20 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
             onChange={onDateChange}
           />
         )}
+        
+        <Button title="Set Due Time" onPress={() => setShowTimePicker(true)} />
+        {showTimePicker && (
+          <DateTimePicker
+            value={dueDate}
+            mode="time"
+            display="default"
+            onChange={onTimeChange}
+          />
+        )}
+
         <Text>Due Date: {dueDate.toDateString()}</Text>
+        <Text>Due Time: {dueDate.toLocaleTimeString()}</Text>
+  
         <Button title="Save" onPress={handleSave} style={styles.button} />
       </View>
     </Modal>
