@@ -9,10 +9,8 @@ export default function forgetpassword() {
         <SafeAreaView style = {styles.background}>
         <ImageBackground source = {require('../assets/images/woods.png')} style = {styles.background}>
 
-        <TouchableOpacity>
         <Image source = {require('../assets/images/lock.png')} style = {styles.lock}></Image>
-        </TouchableOpacity>
-
+        
         <Text style = {styles.titleText}>FORGOT YOUR PASSWORD?</Text>
         <Text style = {styles.message}>Fear not! We can help...</Text>
 
