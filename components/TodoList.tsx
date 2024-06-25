@@ -111,13 +111,16 @@ const TodoList = () => {
       tomorrow: [],
       thisWeek: [],
       thisMonth: [],
-      upcoming:[]
+      upcoming:[],
+      ungrouped:[],
     };
   
     tasks.forEach(task => {
-      if (isOverdue(task.dueDate)) {
+      if (task.dueDate === null) {
+        groupedTasks.ungrouped.push(task);
+      } else if (isOverdue(task.dueDate)) {
         groupedTasks.overdue.push(task);
-      } else if(isDueToday(task.dueDate)) {
+      } else if (isDueToday(task.dueDate)) {
         groupedTasks.today.push(task);
       } else if (isDueTomorrow(task.dueDate)) {
         groupedTasks.tomorrow.push(task);
@@ -136,7 +139,8 @@ const TodoList = () => {
       { title: 'Tomorrow', data: groupedTasks.tomorrow },
       { title: 'This Week', data: groupedTasks.thisWeek },
       { title: 'This Month', data: groupedTasks.thisMonth },
-      { title: 'Upcoming', data: groupedTasks.upcoming }
+      { title: 'Upcoming', data: groupedTasks.upcoming },
+      { title: 'Ungrouped', data: groupedTasks.ungrouped },
     ].filter(section => section.data.length > 0);
   };
 

@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, FlatList, Modal, TextInput, Button} from 'react-native'
+import { Text, View, StyleSheet, FlatList, Modal, TextInput, Button, Alert} from 'react-native'
 import { Provider as PaperProvider, Appbar, FAB, List, IconButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -8,30 +8,81 @@ import RNPickerSelect from 'react-native-picker-select';
 const TaskInputModal = ({ visible, onClose, saveTask }) => {
 
     const[text, setText] = useState("");
-    const [dueDate, setDueDate] = useState(new Date());
+    const [dueDate, setDueDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [category, setCategory] = useState('');
+    const [categories, setCategories] = useState(["Personal", "Work", "School", "Others"]);
+    const [newCategory, setNewCategory] = useState("");
+    const [isEdited, setIsEdited] = useState(false);
     
+    const handleAddCategory = () => {
+      if (newCategory.trim() && !categories.includes(newCategory)) {
+        setCategories([...categories, newCategory]);
+        setCategory(newCategory);
+        setNewCategory("");
+        setIsEdited(true);
+      }
+    };
 
-    const handleSave = () => {
-        if(text.trim()) {
-          saveTask({ task: text, dueDate: dueDate.toISOString(), category: category});
-            setText("");
-            onClose();
-        }
+    const resetInputs = () => {
+      setText("");
+      setDueDate(null);
+      setCategory('');
+      setShowDatePicker(false);
+      setShowTimePicker(false);
+      setIsEdited(false);
     }
+
+    const handleClose = () => {
+      if (isEdited) {
+        Alert.alert(
+          "Confirm",
+          "Are you sure you want to go back? All changes will be lost.",
+          [
+            {
+              text: "Cancel",
+              style: "cancel"
+            },
+            {
+              text: "OK",
+              onPress: () => {
+                resetInputs();
+                onClose();
+              }
+            }
+          ]
+        );
+      } else {
+      resetInputs();
+      onClose();
+    }
+  }
+
+  const handleSave = () => {
+    if(text.trim()) {
+      const dueDateTime = dueDate ? new Date(dueDate) : null;
+      saveTask({ task: text, dueDate: dueDateTime ? dueDateTime.toISOString() : null, category: category });
+        setText("");
+        setCategory('');
+        setDueDate(null);
+        setIsEdited(false);
+        onClose();
+    }
+}
 
     const onDateChange = (event, selectedDate) => {
       const currentDate = selectedDate || dueDate;
       setShowDatePicker(false);
       setDueDate(currentDate);
+      setIsEdited(true);
     };
 
     const onTimeChange = (event, selectedTime) => {
       const currentTime = selectedTime || dueDate;
       setShowTimePicker(false);
       setDueDate(currentTime);
+      setIsEdited(true);
     };
   
 
@@ -39,23 +90,25 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
         <Modal style = {styles.modalContainer}
       animationType = "slide" 
       visible = {visible}
-      onRequestClose={onClose}>
-        <View style = {styles.modalContainer}>
+      onRequestClose={handleClose}>
+
+        <View style = {{backgroundColor: 'yellow', flex: 1}}>
+
         <View style = {styles.modalHeader}>
         <Text style = {styles.modalHeaderText}> Hello! </Text>
-
         </View>
+
         <IconButton style = {styles.modalCloseButton}
         icon = "arrow-left"
         size = {30}
-        onPress={onClose}></IconButton>
+        onPress={handleClose}></IconButton>
 
         <Text style = {styles.subheaderText}>What do you want to do?</Text>
-
         <TextInput style = {styles.textInput}
         placeholder = {"Enter your task here"}
         value = {text}
-        onChangeText = {setText}></TextInput>
+        onChangeText={(value) => { setText(value); setIsEdited(true); }}/>
+
         
         <Text style = {styles.subheaderText}>When?</Text>
 
@@ -63,7 +116,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
           <TextInput
             style={styles.dateInput}
             placeholder="Select due date"
-            value={dueDate.toDateString()}
+            value={dueDate ? dueDate.toDateString() : ""}
             editable={false}
           />
           <IconButton
@@ -73,9 +126,9 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
             onPress={() => setShowDatePicker(true)}
             style={styles.calendarIcon}
           />
-
         </View>
-        <View style={styles.dateInputContainer}>
+
+        {dueDate && (<View style={styles.dateInputContainer}>
         <TextInput
             style={styles.dateInput}
             placeholder="Select due time"
@@ -89,11 +142,11 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
             onPress={() => setShowTimePicker(true)}
             style={styles.calendarIcon}
           />
-          </View>
+          </View>)}
 
         {showDatePicker && (
           <DateTimePicker
-            value={dueDate}
+           value={dueDate || new Date()}
             mode="date"
             display="default"
             onChange={onDateChange}
@@ -102,7 +155,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
         
         {showTimePicker && (
           <DateTimePicker
-            value={dueDate}
+            value={dueDate || new Date()}
             mode="time"
             display="default"
             onChange={onTimeChange}
@@ -112,19 +165,33 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
         <Text style={styles.subheaderText}>Choose a Category</Text>
         <View style = {styles.dropdownContainer}>
         <RNPickerSelect
-          onValueChange={(value) => setCategory(value)}
-          items={[
-            { label: 'Work', value: 'Work' },
-            { label: 'Personal', value: 'Personal' },
-            { label: 'Shopping', value: 'Shopping' },
-            { label: 'Others', value: 'Others' },
-          ]}
-          placeholder={{ label: 'Select a category', value: null }}
+           onValueChange={(value) => { setCategory(value); setIsEdited(true); }}
+           items={categories.map(cat => ({ label: cat, value: cat }))}
+           placeholder={{ label: 'Select a category', value: null }}
         />
         </View>
         
-         <Button title = "Save" onPress = {handleSave} style={styles.button}>
-        </Button>
+        <View style={styles.dateInputContainer}>
+          <TextInput
+            style={styles.dateInput}
+            placeholder="Add a new category"
+            value={newCategory}
+            onChangeText={setNewCategory}
+          />
+           <IconButton
+            icon="plus"
+            color="#6200EE"
+            size={24}
+            onPress={handleAddCategory}
+            style={styles.calendarIcon}
+          />
+        </View>
+
+        <FAB style = {styles.fab}
+        small
+        icon = "check"
+        onPress={handleSave}/>
+         
         </View>
       </Modal>
     )

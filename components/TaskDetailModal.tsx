@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, StyleSheet, TextInput, Button } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { IconButton, FAB } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RNPickerSelect from 'react-native-picker-select';
 
@@ -9,7 +9,8 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
   const [dueDate, setDueDate] = useState(task ? new Date(task.dueDate) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(task ? task.category : '');
+  const [isEdited, setIsEdited] = useState(false);
 
   useEffect(() => {
     if(task) {
@@ -19,9 +20,44 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
     }
   }, [task]);
 
+  const resetInputs = () => {
+    if(task) {
+      setText(task.task);
+      setDueDate(new Date(task.dueDate));
+      setCategory(task.category);
+      setIsEdited(false);
+    }
+  }
+
+  const handleClose = () => {
+    if (isEdited) {
+      Alert.alert(
+        "Confirm",
+        "Are you sure you want to go back? All changes will be lost.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: () => {
+              resetInputs();
+              onClose();
+            }
+          }
+        ]
+      );
+    } else {
+    resetInputs();
+    onClose();
+  }
+}
+
   const handleSave = () => {
     if (text.trim()) {
       onSave(task.id, text, dueDate, category);
+      setIsEdited(false);
       onClose();
     }
   };
@@ -30,19 +66,21 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
     const currentDate = selectedDate || dueDate;
     setShowDatePicker(false);
     setDueDate(currentDate);
+    setIsEdited(true);
   };
 
   const onTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || dueDate;
     setShowTimePicker(false);
     setDueDate(currentTime);
+    setIsEdited(true);
   };
 
   return (
     <Modal
       animationType="slide"
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalHeader}>
@@ -50,7 +88,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
           <IconButton
             icon="arrow-left"
             size={30}
-            onPress={onClose}
+            onPress={handleClose}
             style={styles.modalCloseButton}
           />
         </View>
@@ -58,7 +96,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         <TextInput
           placeholder="Enter your task here"
           value={text}
-          onChangeText={setText}
+          onChangeText={(value) => { setText(value); setIsEdited(true); }}
           style={styles.textInput}
         />
         
@@ -117,7 +155,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         <Text style={styles.subheaderText}>Choose a Category</Text>
         <View style = {styles.dropdownContainer}>
         <RNPickerSelect
-          onValueChange={(value) => setCategory(value)}
+          onValueChange={(value) => { setCategory(value); setIsEdited(true); }}
           items={[
             { label: 'Work', value: 'Work' },
             { label: 'Personal', value: 'Personal' },
@@ -129,7 +167,11 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         />
         </View> 
   
-        <Button title="Save" onPress={handleSave} style={styles.button} />
+        <FAB style = {styles.fab}
+        small
+        icon = "check"
+        onPress={handleSave}/>
+
       </View>
     </Modal>
   );
