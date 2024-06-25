@@ -110,7 +110,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
         )}
         
         <Text style={styles.subheaderText}>Choose a Category</Text>
-        <View style = {styles.dropdownContainer}></View>
+        <View style = {styles.dropdownContainer}>
         <RNPickerSelect
           onValueChange={(value) => setCategory(value)}
           items={[
@@ -121,6 +121,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
           ]}
           placeholder={{ label: 'Select a category', value: null }}
         />
+        </View>
         
          <Button title = "Save" onPress = {handleSave} style={styles.button}>
         </Button>
