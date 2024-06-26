@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
 import TaskDetailModal from '@/components/TaskDetailModal'
 import { differenceInCalendarDays, isToday, isThisWeek, isTomorrow, isThisMonth, isAfter, endOfMonth } from 'date-fns';
+import { supabase } from '@/app/(auth)/client'
 
 
 const TodoList = () => {
@@ -42,12 +43,27 @@ const TodoList = () => {
     saveTasks();
   }, [tasks]);
 
-  const handleAddTask = (task) => {
-    setTasks((prevTasks) => [...prevTasks, { id: Date.now().toString(), ...task }]);
+  async function handleAddTask (task) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const taskid = Date.now().toString()
+      setTasks((prevTasks) => [...prevTasks, { id: taskid, ...task }]);
+      const { data, error } = await supabase.rpc('insert_planner', 
+        { auth_id : user.id, task : task.task, due_date : task.dueDate, category : task.category, task_id : taskid})
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleDeleteTask = (id) => {
-    setTasks((prevTasks) => prevTasks.filter(task => task.id !== id));
+  async function handleDeleteTask (id) {
+    try {
+      setTasks((prevTasks) => prevTasks.filter(task => task.id !== id));
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data, error } = await supabase.rpc('delete_planner', 
+        { auth_id : user.id, task_id : id})
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleTaskClick = (task) => {
@@ -57,11 +73,19 @@ const TodoList = () => {
 
   // Takes in two parameters, namely task name and date(along with time). 
   // Copies all the contents of the current tasks and changes the parameter being updated.
-  const handleSaveTask = (id, newTask, newDueDate, newCategory) => {
-    setTasks((prevTasks) =>
-      prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, category: newCategory } : task)
-  );
-  setTaskDetailModalVisible(false);
+  async function handleSaveTask (id, newTask, newDueDate, newCategory) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data, error } = await supabase.rpc('edit_planner', 
+        { auth_id : user.id, task : newTask, due_date : newDueDate, category : newCategory, task_id : id })
+  
+      setTasks((prevTasks) =>
+        prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, category: newCategory } : task)
+    );
+      setTaskDetailModalVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSearch = (query) => {
