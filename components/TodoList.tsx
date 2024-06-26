@@ -19,10 +19,17 @@ const TodoList = () => {
   useEffect(() => {
     const loadTasks = async () => {
       try{
-        const storedTasks = await AsyncStorage.getItem('tasks');
+        /*const storedTasks = await AsyncStorage.getItem('tasks');
+        console.log(storedTasks);
         if(storedTasks) {
           setTasks(JSON.parse(storedTasks));
-        }
+        }*/
+        const { data: { user } } = await supabase.auth.getUser()
+        const { data, error } = await supabase.rpc('display_planner', 
+          {auth_id : user.id})
+        if (error) { throw error; }
+        console.log(data);
+        setTasks(data);
       } catch (error) {
         console.error(error);
       }

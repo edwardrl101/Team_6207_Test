@@ -14,6 +14,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
 
   useEffect(() => {
     if(task) {
+<<<<<<< HEAD
       setText(task.task);
       if(task.dueDate) {
       setDueDate(new Date(task.dueDate));
@@ -21,16 +22,35 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         setDueDate(null);
       }
       setCategory(task.category);
+=======
+        setText(task.task);
+        if(task.dueDate) {
+          setDueDate(new Date(task.dueDate));
+          } else {
+            setDueDate(null);
+          }
+        setCategory(task.category);
+>>>>>>> 065e1a2d1343e33fc8d9ab67e8cb859b69a6f673
     }
   }, [task]);
 
   const resetInputs = () => {
+<<<<<<< HEAD
     setText(task.task);
       if(task.dueDate) {
       setDueDate(new Date(task.dueDate));
       } else {
         setDueDate(null);
       }
+=======
+    if(task) {
+      setText(task.task);
+      if(task.dueDate) {
+        setDueDate(new Date(task.dueDate));
+        } else {
+          setDueDate(null);
+        }
+>>>>>>> 065e1a2d1343e33fc8d9ab67e8cb859b69a6f673
       setCategory(task.category);
       setIsEdited(false);
   }
@@ -116,7 +136,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
           style={styles.textInput}
         />
         
-        <Text style = {styles.subheaderText}>When? (Optional)</Text>
+        <Text style = {styles.subheaderText}>When?</Text>
         <View style={styles.dateInputContainer}>
     
           <TextInput
@@ -152,7 +172,11 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
 
         {showDatePicker && (
           <DateTimePicker
+<<<<<<< HEAD
             value={dueDate || new Date()}
+=======
+           value={dueDate || new Date()}
+>>>>>>> 065e1a2d1343e33fc8d9ab67e8cb859b69a6f673
             mode="date"
             display="default"
             onChange={onDateChange}
