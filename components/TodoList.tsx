@@ -191,6 +191,7 @@ const TodoList = () => {
       onPress={() => handleDeleteTask(item.id)}
       />
     )}
+    style = {styles.listItem}
     />
   );
 
