@@ -126,6 +126,14 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
             onPress={() => setShowDatePicker(true)}
             style={styles.calendarIcon}
           />
+          
+          {dueDate && (<IconButton
+            icon="close"
+            color="#6200EE"
+            size={24}
+            onPress={() => setDueDate(null)}
+            style={styles.calendarIcon}
+          />)}
         </View>
 
         {dueDate && (<View style={styles.dateInputContainer}>

@@ -15,15 +15,10 @@ const TodoList = () => {
   const[taskDetailModalVisible, setTaskDetailModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load the tasks from the local device for now
+  // Load the tasks from Supabase
   useEffect(() => {
     const loadTasks = async () => {
       try{
-        /*const storedTasks = await AsyncStorage.getItem('tasks');
-        console.log(storedTasks);
-        if(storedTasks) {
-          setTasks(JSON.parse(storedTasks));
-        }*/
         const { data: { user } } = await supabase.auth.getUser()
         const { data, error } = await supabase.rpc('display_planner', 
           {auth_id : user.id})
@@ -37,18 +32,6 @@ const TodoList = () => {
 
     loadTasks();
   }, []);
-
-  useEffect(() => {
-    const saveTasks = async() => {
-      try {
-        await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    saveTasks();
-  }, [tasks]);
 
   async function handleAddTask (task) {
     try {
