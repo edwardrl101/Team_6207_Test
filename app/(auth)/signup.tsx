@@ -58,8 +58,9 @@ export default function signup() {
         const { data, error } = await supabase.auth.signUp(
           {
             email: email,
-            password: password, //check if password match
+            password: password,
             options: {
+              emailRedirectTo: 'http://localhost:8081/success',
               data: {
                 username: username,
               }
