@@ -29,6 +29,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
       setText("");
       setDueDate(null);
       setCategory('');
+      setNewCategory("");
       setShowDatePicker(false);
       setShowTimePicker(false);
       setIsEdited(false);
@@ -66,6 +67,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
         setText("");
         setCategory('');
         setDueDate(null);
+        setNewCategory("");
         setIsEdited(false);
         onClose();
     }
@@ -126,6 +128,14 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
             onPress={() => setShowDatePicker(true)}
             style={styles.calendarIcon}
           />
+          
+          {dueDate && (<IconButton
+            icon="close"
+            color="#6200EE"
+            size={24}
+            onPress={() => setDueDate(null)}
+            style={styles.calendarIcon}
+          />)}
         </View>
 
         {dueDate && (<View style={styles.dateInputContainer}>
@@ -176,8 +186,8 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
             style={styles.dateInput}
             placeholder="Add a new category"
             value={newCategory}
-            onChangeText={setNewCategory}
-          />
+            onChangeText={(value) => { setNewCategory(value); setIsEdited(true); }}/>
+      
            <IconButton
             icon="plus"
             color="#6200EE"
