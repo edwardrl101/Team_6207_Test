@@ -6,7 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 
 const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
   const [text, setText] = useState(task ? task.task : '');
-  const [dueDate, setDueDate] = useState(task ? new Date(task.dueDate) : new Date());
+  const [dueDate, setDueDate] = useState(task.dueDate === null ? null : new Date(task.dueDate));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [category, setCategory] = useState(task ? task.category : '');
@@ -14,19 +14,25 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
 
   useEffect(() => {
     if(task) {
-        setText(task.task);
-        setDueDate(new Date(task.dueDate));
-        setCategory(task.category);
+      setText(task.task);
+      if(task.dueDate) {
+      setDueDate(new Date(task.dueDate));
+      } else {
+        setDueDate(null);
+      }
+      setCategory(task.category);
     }
   }, [task]);
 
   const resetInputs = () => {
-    if(task) {
-      setText(task.task);
+    setText(task.task);
+      if(task.dueDate) {
       setDueDate(new Date(task.dueDate));
+      } else {
+        setDueDate(null);
+      }
       setCategory(task.category);
       setIsEdited(false);
-    }
   }
 
   const handleClose = () => {
@@ -63,17 +69,27 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
   };
 
   const onDateChange = (event, selectedDate) => {
+    if (event.type === "dismissed") {
+      setShowDatePicker(false);
+      return;
+    } else {
     const currentDate = selectedDate || dueDate;
     setShowDatePicker(false);
     setDueDate(currentDate);
     setIsEdited(true);
+    }
   };
 
   const onTimeChange = (event, selectedTime) => {
+    if (event.type === "dismissed") {
+      setShowTimePicker(false);
+      return;
+    } else {
     const currentTime = selectedTime || dueDate;
     setShowTimePicker(false);
     setDueDate(currentTime);
     setIsEdited(true);
+    }
   };
 
   return (
@@ -106,7 +122,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
           <TextInput
             style={styles.dateInput}
             placeholder="Select due date"
-            value={dueDate.toDateString()}
+            value={dueDate ? dueDate.toDateString() : ""}
             editable={false}
           />
           <IconButton
@@ -118,11 +134,11 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
           />
         </View>
 
-        <View style={styles.dateInputContainer}>
+        {dueDate && (<View style={styles.dateInputContainer}>
         <TextInput
             style={styles.dateInput}
             placeholder="Select due time"
-            value={dueDate.toLocaleTimeString()}
+            value={dueDate ? dueDate.toLocaleTimeString() : ""}
             editable={false}
           />
           <IconButton
@@ -132,11 +148,11 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
             onPress={() => setShowTimePicker(true)}
             style={styles.calendarIcon}
           />
-          </View>
+          </View>)}
 
         {showDatePicker && (
           <DateTimePicker
-            value={dueDate}
+            value={dueDate || new Date()}
             mode="date"
             display="default"
             onChange={onDateChange}
@@ -145,7 +161,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
 
         {showTimePicker && (
           <DateTimePicker
-            value={dueDate}
+            value={dueDate || new Date()}
             mode="time"
             display="default"
             onChange={onTimeChange}

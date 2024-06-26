@@ -77,7 +77,7 @@ const TodoList = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase.rpc('edit_planner', 
-        { auth_id : user.id, task : newTask, due_date : newDueDate, category : newCategory, task_id : id })
+        { auth_id : user.id, newtask : newTask, due_date : newDueDate, newcategory : newCategory, task_id : id })
   
       setTasks((prevTasks) =>
         prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, category: newCategory } : task)
@@ -177,13 +177,14 @@ const TodoList = () => {
   const renderItem = ({ item }) => (
     <List.Item
     title = {item.task}
-    description={`Due: ${new Date(item.dueDate).toDateString()} ${new Date(item.dueDate).toLocaleTimeString()}\n${item.category || 'No Category'}`}
+    description={`Due: ${item.dueDate ? new Date(item.dueDate).toDateString() : ""} ${item.dueDate ? new Date(item.dueDate).toLocaleTimeString() : ""}\n${item.category || 'No Category'}`}
     onPress = {() => handleTaskClick(item)}
     right = {() => (
       <IconButton icon ="delete"
       onPress={() => handleDeleteTask(item.id)}
       />
     )}
+    style = {styles.listItem}
     />
   );
 
@@ -240,7 +241,7 @@ const TodoList = () => {
 const styles = StyleSheet.create({
   container: {
   flex: 1,
-  backgroundColor: 'white'
+  backgroundColor: '#F3E5F5'
   },
   fab: {
     position: 'absolute',
