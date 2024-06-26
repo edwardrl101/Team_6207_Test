@@ -248,7 +248,7 @@ const TodoList = () => {
 const styles = StyleSheet.create({
   container: {
   flex: 1,
-  backgroundColor: 'white'
+  backgroundColor: '#F3E5F5'
   },
   fab: {
     position: 'absolute',
