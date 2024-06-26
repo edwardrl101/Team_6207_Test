@@ -11,6 +11,8 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [category, setCategory] = useState(task ? task.category : '');
   const [isEdited, setIsEdited] = useState(false);
+  const [categories, setCategories] = useState(["Work", "Personal", "Shopping", "Others"]); // Default categories
+  const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {
     if(task) {
@@ -24,6 +26,15 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
     }
   }, [task]);
 
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !categories.includes(newCategory)) {
+      setCategories([...categories, newCategory]);
+      setCategory(newCategory);
+      setNewCategory("");
+      setIsEdited(true);
+    }
+  };
+
   const resetInputs = () => {
     setText(task.task);
       if(task.dueDate) {
@@ -32,6 +43,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         setDueDate(null);
       }
       setCategory(task.category);
+      setNewCategory("");
       setIsEdited(false);
   }
 
@@ -172,16 +184,26 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         <View style = {styles.dropdownContainer}>
         <RNPickerSelect
           onValueChange={(value) => { setCategory(value); setIsEdited(true); }}
-          items={[
-            { label: 'Work', value: 'Work' },
-            { label: 'Personal', value: 'Personal' },
-            { label: 'Shopping', value: 'Shopping' },
-            { label: 'Others', value: 'Others' },
-          ]}
-
+          items={categories.map(cat => ({ label: cat, value: cat }))}
           placeholder={{ label: 'Select a category', value: category }}
         />
         </View> 
+
+        <View style={styles.dateInputContainer}>
+          <TextInput
+            style={styles.dateInput}
+            placeholder="Add a new category"
+            value={newCategory}
+            onChangeText={setNewCategory}
+          />
+          <IconButton
+            icon="plus"
+            color="#6200EE"
+            size={24}
+            onPress={handleAddCategory}
+            style={styles.addButton}
+          />
+        </View>
   
         <FAB style = {styles.fab}
         small

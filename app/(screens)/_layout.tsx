@@ -10,6 +10,6 @@ export default function RootLayout() {
 
 
   return (
-    <Drawer />
+    <Drawer/>
   );
 }
