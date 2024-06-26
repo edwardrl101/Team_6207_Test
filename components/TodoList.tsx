@@ -61,8 +61,6 @@ const TodoList = () => {
     setTaskDetailModalVisible(true);
   };
 
-  // Takes in two parameters, namely task name and date(along with time). 
-  // Copies all the contents of the current tasks and changes the parameter being updated.
   async function handleSaveTask (id, newTask, newDueDate, newCategory) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
