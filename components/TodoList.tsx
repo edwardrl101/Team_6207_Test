@@ -77,7 +77,7 @@ const TodoList = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase.rpc('edit_planner', 
-        { auth_id : user.id, task : newTask, due_date : newDueDate, category : newCategory, task_id : id })
+        { auth_id : user.id, newtask : newTask, due_date : newDueDate, newcategory : newCategory, task_id : id })
   
       setTasks((prevTasks) =>
         prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, category: newCategory } : task)
