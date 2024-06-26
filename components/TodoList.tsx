@@ -1,10 +1,11 @@
-import { Text, View, StyleSheet, FlatList, Modal} from 'react-native'
-import { Provider as PaperProvider, Appbar, FAB, List, IconButton } from 'react-native-paper';
+import { Text, View, StyleSheet, FlatList, Modal, SectionList} from 'react-native'
+import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
 import TaskDetailModal from '@/components/TaskDetailModal'
-import { differenceInCalendarDays, isThisWeek, isTomorrow, isThisMonth, isAfter, endOfMonth } from 'date-fns';
+import { differenceInCalendarDays, isToday, isThisWeek, isTomorrow, isThisMonth, isAfter, endOfMonth } from 'date-fns';
+import { supabase } from '@/app/(auth)/client'
 
 
 const TodoList = () => {
@@ -12,7 +13,9 @@ const TodoList = () => {
   const[tasks, setTasks] = useState([]);
   const[selectedTask, setSelectedTask] = useState(null);
   const[taskDetailModalVisible, setTaskDetailModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
+  // Load the tasks from the local device for now
   useEffect(() => {
     const loadTasks = async () => {
       try{
@@ -40,12 +43,27 @@ const TodoList = () => {
     saveTasks();
   }, [tasks]);
 
-  const handleAddTask = (task) => {
-    setTasks((prevTasks) => [...prevTasks, { id: Date.now().toString(), ...task }]);
+  async function handleAddTask (task) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const taskid = Date.now().toString()
+      setTasks((prevTasks) => [...prevTasks, { id: taskid, ...task }]);
+      const { data, error } = await supabase.rpc('insert_planner', 
+        { auth_id : user.id, task : task.task, due_date : task.dueDate, category : task.category, task_id : taskid})
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleDeleteTask = (id) => {
-    setTasks((prevTasks) => prevTasks.filter(task => task.id !== id));
+  async function handleDeleteTask (id) {
+    try {
+      setTasks((prevTasks) => prevTasks.filter(task => task.id !== id));
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data, error } = await supabase.rpc('delete_planner', 
+        { auth_id : user.id, task_id : id})
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleTaskClick = (task) => {
@@ -55,12 +73,29 @@ const TodoList = () => {
 
   // Takes in two parameters, namely task name and date(along with time). 
   // Copies all the contents of the current tasks and changes the parameter being updated.
-  const handleSaveTask = (id, newTask, newDueDate) => {
-    setTasks((prevTasks) =>
-      prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate } : task)
-  );
-  setTaskDetailModalVisible(false);
+  async function handleSaveTask (id, newTask, newDueDate, newCategory) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data, error } = await supabase.rpc('edit_planner', 
+        { auth_id : user.id, task : newTask, due_date : newDueDate, category : newCategory, task_id : id })
+  
+      setTasks((prevTasks) =>
+        prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, category: newCategory } : task)
+    );
+      setTaskDetailModalVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
+  // Check if a task is due today
+  const isDueToday = (dueDate) => {
+    return isToday(new Date(dueDate));
+  }
 
   // Check if a task is due tomorrow
   const isDueTomorrow = (dueDate) => {
@@ -85,26 +120,32 @@ const TodoList = () => {
     return isAfter(date, endOfMonth(new Date()));
   };
 
-  // Check if a task is overdue
+  // Check if a task is overdue, including the ones today
   const isOverdue = (dueDate) => {
-    const today = new Date();
+    const now = new Date();
     const date = new Date(dueDate);
-    return differenceInCalendarDays(date, today) < 0;
+    return date < now;
   };
 
   // Group the tasks by date
   const groupTasksByDate = (tasks) => {
     const groupedTasks = {
       overdue: [],
+      today: [],
       tomorrow: [],
       thisWeek: [],
       thisMonth: [],
-      upcoming:[]
+      upcoming:[],
+      ungrouped:[],
     };
   
     tasks.forEach(task => {
-      if (isOverdue(task.dueDate)) {
+      if (task.dueDate === null) {
+        groupedTasks.ungrouped.push(task);
+      } else if (isOverdue(task.dueDate)) {
         groupedTasks.overdue.push(task);
+      } else if (isDueToday(task.dueDate)) {
+        groupedTasks.today.push(task);
       } else if (isDueTomorrow(task.dueDate)) {
         groupedTasks.tomorrow.push(task);
       } else if (isDueThisWeek(task.dueDate)) {
@@ -116,15 +157,27 @@ const TodoList = () => {
       }
     });
   
-    return groupedTasks;
+    return [
+      { title: 'Overdue', data: groupedTasks.overdue },
+      { title: 'Today', data: groupedTasks.today},
+      { title: 'Tomorrow', data: groupedTasks.tomorrow },
+      { title: 'This Week', data: groupedTasks.thisWeek },
+      { title: 'This Month', data: groupedTasks.thisMonth },
+      { title: 'Upcoming', data: groupedTasks.upcoming },
+      { title: 'Ungrouped', data: groupedTasks.ungrouped },
+    ].filter(section => section.data.length > 0);
   };
 
-  const groupedTasks = groupTasksByDate(tasks);
+  const filteredTasks = tasks.filter(task =>
+    task.task.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const groupedTasks = groupTasksByDate(filteredTasks);
 
   const renderItem = ({ item }) => (
     <List.Item
     title = {item.task}
-    description={`Due: ${new Date(item.dueDate).toDateString()} ${new Date(item.dueDate).toLocaleTimeString()}`}
+    description={`Due: ${new Date(item.dueDate).toDateString()} ${new Date(item.dueDate).toLocaleTimeString()}\n${item.category || 'No Category'}`}
     onPress = {() => handleTaskClick(item)}
     right = {() => (
       <IconButton icon ="delete"
@@ -141,61 +194,23 @@ const TodoList = () => {
 
       <List.Section>
         <List.Subheader style = {styles.headerText} >My Tasks</List.Subheader>
-        
-        {groupedTasks.overdue.length > 0 && (
-            <>
-              <List.Subheader style={styles.headerText}>Overdue</List.Subheader>
-              <FlatList
-                data={groupedTasks.overdue}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-              />
-            </>
-          )}
-
-          {groupedTasks.tomorrow.length > 0 && (
-            <>
-              <List.Subheader style={styles.headerText}>Tomorrow</List.Subheader>
-              <FlatList
-                data={groupedTasks.tomorrow}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-              />
-            </>
-          )}
-
-          {groupedTasks.thisWeek.length > 0 && (
-            <>
-              <List.Subheader style={styles.headerText}>This Week</List.Subheader>
-              <FlatList
-                data={groupedTasks.thisWeek}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-              />
-            </>
-          )}
+        <Searchbar
+            placeholder="Search"
+            onChangeText={handleSearch}
+            value={searchQuery}
+            style={styles.searchBar}
+          />
           
-          {groupedTasks.thisMonth.length > 0 && (
-            <>
-              <List.Subheader style={styles.headerText}>This Month</List.Subheader>
-              <FlatList
-                data={groupedTasks.thisMonth}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-              />
-            </>
+          <SectionList
+          sections={groupedTasks}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          renderSectionHeader={({ section: { title } }) => (
+            <List.Subheader style={title === 'Overdue' ? styles.overdueText : styles.subheaderText}>{title}</List.Subheader>
           )}
-
-          {groupedTasks.upcoming.length > 0 && (
-            <>
-              <List.Subheader style={styles.headerText}>Upcoming</List.Subheader>
-              <FlatList
-                data={groupedTasks.upcoming}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-              />
-            </>
-          )}
+          contentContainerStyle={styles.sectionList}
+        />
+        
       </List.Section>
 
     <FAB style = {styles.fab}
@@ -238,7 +253,38 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 30,
     fontSize: 25
-  }
+  },
+  overdueText: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    paddingVertical: 5,
+    color: 'red'
+  },
+  subheaderText: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    paddingVertical: 5,
+    color: 'purple'
+  },
+  section: {
+    marginBottom: 20,
+  },
+  listItem: {
+    backgroundColor: '#E1BEE7',  // White background for list items
+    borderRadius: 20,
+    marginVertical: 10,
+    marginHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    shadowColor: '#000000',  // Black shadow color
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 1,
+    elevation: 3,
+  },
+  sectionList: {
+    marginBottom: 20
+  },
 })
 
 export default TodoList
