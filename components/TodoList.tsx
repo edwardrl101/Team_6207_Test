@@ -184,7 +184,7 @@ const TodoList = () => {
   const renderItem = ({ item }) => (
     <List.Item
     title = {item.task}
-    description={`Due: ${new Date(item.dueDate).toDateString()} ${new Date(item.dueDate).toLocaleTimeString()}\n${item.category || 'No Category'}`}
+    description={`Due: ${item.dueDate ? new Date(item.dueDate).toDateString() : ""} ${item.dueDate ? new Date(item.dueDate).toLocaleTimeString() : ""}\n${item.category || 'No Category'}`}
     onPress = {() => handleTaskClick(item)}
     right = {() => (
       <IconButton icon ="delete"
