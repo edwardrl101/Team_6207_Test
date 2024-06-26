@@ -38,8 +38,15 @@ const TodoList = () => {
       const { data: { user } } = await supabase.auth.getUser()
       const taskid = Date.now().toString()
       setTasks((prevTasks) => [...prevTasks, { id: taskid, ...task }]);
+
       const { data, error } = await supabase.rpc('insert_planner', 
-        { auth_id : user.id, task : task.task, due_date : task.dueDate, category : task.category, task_id : taskid})
+        { auth_id : user.id, 
+          taskname : task.task, 
+          due_date : task.dueDate, 
+          start_date: task.startDate,
+          categoryname : task.category, 
+          task_id : taskid })
+  
     } catch (error) {
       console.log(error);
     }

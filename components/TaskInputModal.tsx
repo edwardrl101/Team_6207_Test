@@ -34,8 +34,10 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
       setDueDate(null);
       setCategory('');
       setNewCategory("");
-      setShowDatePicker(false);
-      setShowTimePicker(false);
+      setShowStartDatePicker(false);
+      setShowStartTimePicker(false);
+      setShowDueDatePicker(false);
+      setShowDueTimePicker(false);
       setIsEdited(false);
     }
 
@@ -71,7 +73,9 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
     }
     if(text.trim()) {
       const dueDateTime = dueDate ? new Date(dueDate) : null;
-      saveTask({ task: text, dueDate: dueDateTime ? dueDateTime.toISOString() : null, category: category });
+      const startDateTime = startDate ? new Date(startDate) : null;
+      saveTask({ task: text, dueDate: dueDateTime ? dueDateTime.toISOString() : null, 
+        startDate: startDateTime ? startDateTime.toISOString() : null, category: category });
         setText("");
         setCategory('');
         setStartDate(null);
