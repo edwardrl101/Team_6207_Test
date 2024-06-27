@@ -7,7 +7,7 @@ import CalendarButton from './styles/CalendarButton';
 import ClockButton from './styles/ClockButton';
 import ResetButton from './styles/ResetButton';
 
-const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
+const TaskDetailModal = ({ visible, onClose, task, onSave, onDelete }) => {
   const [text, setText] = useState(task ? task.task : '');
   const [dueDate, setDueDate] = useState(task.dueDate === null ? null : new Date(task.dueDate));
   const [startDate, setStartDate] = useState(task.startDate === null ? null : new Date(task.startDate));
@@ -102,6 +102,27 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
     }
   };
 
+  const handleDelete = () => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to delete this task?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            onClose();
+            onDelete(task.id);
+          }
+        }
+      ]
+    );
+    
+  }
+
   const onDateChange = (event, selectedDate) => {
     if(event.type === 'dismissed') {
       setShowDatePicker(false);
@@ -150,8 +171,14 @@ const onTimeChange = (event, selectedTime) => {
             onPress={handleClose}
             style={styles.modalCloseButton}
           />
+          <IconButton
+          icon = "delete"
+          size = {30}
+          onPress = {handleDelete}
+          style = {styles.deleteButton}
+          />
         </View>
-        <Text style = {styles.subheaderText}>Edit your task:</Text>
+        <Text style = {styles.subheaderText}>What do you want to do?</Text>
         <TextInput
           placeholder="Enter your task here"
           value={text}
@@ -275,8 +302,9 @@ const styles = StyleSheet.create({
         color: 'white',
       },
     modalHeader: {
+        flexDirection: 'row',
         backgroundColor: '#F3E5F5', // light gray background
-        padding: 20,
+        padding: 2,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         width: '100%',
@@ -284,12 +312,13 @@ const styles = StyleSheet.create({
     modalHeaderText: {
         fontSize: 25,
         fontWeight: 'bold',
-        marginTop: 1,
-        marginLeft: 40,
+        marginTop: 18,
+        marginLeft: 55,
         color: 'purple'
     },
-    button: {
-        marginTop: 100,
+    deleteButton: {
+      marginTop: 12,
+        marginLeft: 160,
     },
     fab: {
       position: 'absolute',

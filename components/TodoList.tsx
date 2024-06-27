@@ -64,7 +64,7 @@ const TodoList = () => {
         setTasks((prevTasks) =>
           prevTasks.map(task => task.id === id ? { ...task, completedStatus: updatedStatus } : task)
         );
-        
+
     } catch (error) {
       console.log(error);
     }
@@ -254,6 +254,7 @@ const TodoList = () => {
         task = {selectedTask}
         onClose = {() => setTaskDetailModalVisible(false)}
         onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
         />
       )}
       
