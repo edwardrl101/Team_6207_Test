@@ -1,13 +1,11 @@
 import { Text, View, StyleSheet, FlatList, Modal, SectionList} from 'react-native'
-import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar, Checkbox } from 'react-native-paper';
 import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
 import TaskDetailModal from '@/components/TaskDetailModal'
 import { differenceInCalendarDays, isToday, isThisWeek, isTomorrow, isThisMonth, isAfter, endOfMonth } from 'date-fns';
 import { supabase } from '@/app/(auth)/client'
 import TaskDescription from './styles/TaskDescription';
-
 
 const TodoList = () => {
   const[modalVisible, setModalVisible] = useState(false);
@@ -46,8 +44,27 @@ const TodoList = () => {
           due_date : task.dueDate, 
           start_date: task.startDate,
           categoryname : task.category, 
-          task_id : taskid })
+          task_id : taskid,
+          completed_status: task.completedStatus})
   
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const toggleCompletion = async (id) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const taskToToggle = tasks.find(task => task.id === id);
+      const updatedStatus = !taskToToggle.completedStatus;
+
+      const { data, error } = await supabase.rpc('toggle_task_completion', 
+        { auth_id: user.id, task_id: id, completed_status: updatedStatus });
+
+        setTasks((prevTasks) =>
+          prevTasks.map(task => task.id === id ? { ...task, completedStatus: updatedStatus } : task)
+        );
+        
     } catch (error) {
       console.log(error);
     }
@@ -187,8 +204,9 @@ const TodoList = () => {
     description={() => <TaskDescription startDate={item.startDate} dueDate={item.dueDate} category={item.category} />}
     onPress = {() => handleTaskClick(item)}
     right = {() => (
-      <IconButton icon ="delete"
-      onPress={() => handleDeleteTask(item.id)}
+      <Checkbox
+      status={item.completedStatus ? 'checked' : 'unchecked'}
+      onPress={() => toggleCompletion(item.id)}
       />
     )}
     style = {styles.listItem}
@@ -201,7 +219,7 @@ const TodoList = () => {
     <View style = {styles.container}>
 
       <List.Section>
-        <List.Subheader style = {styles.headerText} >My Tasks</List.Subheader>
+        <List.Subheader style = {styles.headerText} >My Active Tasks</List.Subheader>
         <Searchbar
             placeholder="Search"
             onChangeText={handleSearch}
@@ -259,7 +277,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontWeight: 'bold',
-    marginTop: 30,
+    marginTop: 5,
     fontSize: 25
   },
   overdueText: {
