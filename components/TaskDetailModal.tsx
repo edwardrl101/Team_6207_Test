@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { Modal, View, Text, StyleSheet, TextInput, Button, Alert, SafeAreaView, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { IconButton, FAB } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RNPickerSelect from 'react-native-picker-select';
+import CalendarButton from './styles/CalendarButton';
+import ClockButton from './styles/ClockButton';
+import ResetButton from './styles/ResetButton';
 
 const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
   const [text, setText] = useState(task ? task.task : '');
   const [dueDate, setDueDate] = useState(task.dueDate === null ? null : new Date(task.dueDate));
+  const [startDate, setStartDate] = useState(task.startDate === null ? null : new Date(task.startDate));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [category, setCategory] = useState(task ? task.category : '');
   const [isEdited, setIsEdited] = useState(false);
+  const [dateType, setDateType] = useState(''); // 'start' or 'due'
+  const [timeType, setTimeType] = useState(''); // 'start' or 'due'
   const [categories, setCategories] = useState(["Work", "Personal", "Shopping", "Others"]); // Default categories
   const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {
     if(task) {
       setText(task.task);
+      setStartDate(new Date(task.startDate))
       if(task.dueDate) {
       setDueDate(new Date(task.dueDate));
       } else {
@@ -37,6 +44,11 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
 
   const resetInputs = () => {
     setText(task.task);
+    if(task.startDate) {
+      setStartDate(new Date(task.startDate));
+    } else {
+      setStartDate(null);
+    }
       if(task.dueDate) {
       setDueDate(new Date(task.dueDate));
       } else {
@@ -44,6 +56,8 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
       }
       setCategory(task.category);
       setNewCategory("");
+      setDateType('');
+      setTimeType('');
       setIsEdited(false);
   }
 
@@ -73,36 +87,52 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
 }
 
   const handleSave = () => {
+    if(!dueDate || !startDate) {
+      Alert.alert('Invalid Date Selection', 'Please Enter a Date')
+      return;
+    }
+    if((dueDate && startDate) && dueDate < startDate) {
+      Alert.alert('Invalid Date Selection', 'Due date cannot be before the start date.');
+        return;
+    }
     if (text.trim()) {
-      onSave(task.id, text, dueDate, category);
+      onSave(task.id, text, dueDate, startDate, category);
       setIsEdited(false);
       onClose();
     }
   };
 
   const onDateChange = (event, selectedDate) => {
-    if (event.type === "dismissed") {
+    if(event.type === 'dismissed') {
       setShowDatePicker(false);
       return;
     } else {
-    const currentDate = selectedDate || dueDate;
-    setShowDatePicker(false);
-    setDueDate(currentDate);
-    setIsEdited(true);
-    }
-  };
-
-  const onTimeChange = (event, selectedTime) => {
-    if (event.type === "dismissed") {
-      setShowTimePicker(false);
-      return;
+      const currentDate = selectedDate || (dateType === 'start' ? startDate : dueDate);
+      setShowDatePicker(false);
+      if (dateType === 'start') {
+      setStartDate(currentDate);
     } else {
-    const currentTime = selectedTime || dueDate;
-    setShowTimePicker(false);
-    setDueDate(currentTime);
-    setIsEdited(true);
+      setDueDate(currentDate);
     }
-  };
+    setIsEdited(true);
+  }
+}
+
+const onTimeChange = (event, selectedTime) => {
+  if(event.type === 'dismissed') {
+    setShowTimePicker(false);
+    return;
+  } else {
+    const currentTime = selectedTime || (dateType === 'start' ? startDate : dueDate);
+    setShowTimePicker(false);
+    if (dateType === 'start') {
+    setStartDate(currentTime);
+  } else {
+    setDueDate(currentTime);
+  }
+  setIsEdited(true);
+}
+}
 
   return (
     <Modal
@@ -110,7 +140,8 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
       visible={visible}
       onRequestClose={handleClose}
     >
-      <View style={styles.modalContainer}>
+      <SafeAreaView style={styles.modalContainer}>
+        <ScrollView>
         <View style={styles.modalHeader}>
         <Text style={styles.modalHeaderText}>Edit Task</Text>
           <IconButton
@@ -128,22 +159,40 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
           style={styles.textInput}
         />
         
-        <Text style = {styles.subheaderText}>When?</Text>
+        <Text style = {styles.subheaderText}>Start</Text>
         <View style={styles.dateInputContainer}>
-    
+          <TextInput
+            style={styles.dateInput}
+            placeholder="Select a date"
+            value={startDate ? startDate.toDateString() : ""}
+            editable={false}/>
+            
+            <CalendarButton onClose = {() => {setDateType('start'); setShowDatePicker(true)}}/>
+
+          {startDate && (<ResetButton onClose = {() => setStartDate(null)}/>
+            )}
+        </View>
+
+        {startDate && (<View style={styles.dateInputContainer}>
+        <TextInput
+            style={styles.dateInput}
+            placeholder="Select a time"
+            value={startDate.toLocaleTimeString()}
+            editable={false}
+          />
+          <ClockButton onClose = {() => {setTimeType('start'); setShowTimePicker(true)}}/>
+          </View>)}
+        
+        {startDate && (<View>
+        <Text style = {styles.subheaderText}>End</Text>
+        <View style={styles.dateInputContainer}>
           <TextInput
             style={styles.dateInput}
             placeholder="Select due date"
             value={dueDate ? dueDate.toDateString() : ""}
             editable={false}
           />
-          <IconButton
-            icon="calendar"
-            color="#6200EE"
-            size={24}
-            onPress={() => setShowDatePicker(true)}
-            style={styles.calendarIcon}
-          />
+          <CalendarButton onClose = {() => {setDateType('due'); setShowDatePicker(true)}}/>
         </View>
 
         {dueDate && (<View style={styles.dateInputContainer}>
@@ -153,27 +202,21 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
             value={dueDate ? dueDate.toLocaleTimeString() : ""}
             editable={false}
           />
-          <IconButton
-            icon="clock"
-            color="#6200EE"
-            size={24}
-            onPress={() => setShowTimePicker(true)}
-            style={styles.calendarIcon}
-          />
+          <ClockButton onClose = {() => {setTimeType('due'); setShowTimePicker(true)}}/>
+          </View>)}
           </View>)}
 
-        {showDatePicker && (
+          {showDatePicker && (
           <DateTimePicker
-            value={dueDate || new Date()}
+            value={dateType === 'start' ? (startDate || new Date()) : (dueDate || new Date())}
             mode="date"
             display="default"
-            onChange={onDateChange}
-          />
+            onChange={onDateChange}/>
         )}
-
-        {showTimePicker && (
+        
+          {showTimePicker && (
           <DateTimePicker
-            value={dueDate || new Date()}
+            value={timeType === 'start' ? (startDate || new Date()) : (dueDate || new Date())}
             mode="time"
             display="default"
             onChange={onTimeChange}
@@ -189,6 +232,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
         />
         </View> 
 
+        <KeyboardAvoidingView behavior = "padding">
         <View style={styles.dateInputContainer}>
           <TextInput
             style={styles.dateInput}
@@ -203,14 +247,16 @@ const TaskDetailModal = ({ visible, onClose, task, onSave }) => {
             onPress={handleAddCategory}
             style={styles.addButton}
           />
-        </View>
+          </View>
+        </KeyboardAvoidingView>
+        </ScrollView>
   
         <FAB style = {styles.fab}
         small
         icon = "check"
         onPress={handleSave}/>
 
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };
@@ -288,9 +334,6 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.3,
       shadowRadius: 1,
       elevation: 3,
-    },
-    calendarIcon: {
-      marginRight: 10,
     },
     dateInput: {
       flex: 1,
