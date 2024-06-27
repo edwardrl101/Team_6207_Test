@@ -6,6 +6,7 @@ import TaskInputModal from '@/components/TaskInputModal'
 import TaskDetailModal from '@/components/TaskDetailModal'
 import { differenceInCalendarDays, isToday, isThisWeek, isTomorrow, isThisMonth, isAfter, endOfMonth } from 'date-fns';
 import { supabase } from '@/app/(auth)/client'
+import TaskDescription from './styles/TaskDescription';
 
 
 const TodoList = () => {
@@ -122,6 +123,11 @@ const TodoList = () => {
     return date < now;
   };
 
+  const isInProgess = (startDate, dueDate) => {
+    const now = new Date();
+    return (startDate <= now && now <= dueDate);
+  }
+
   // Group the tasks by date
   const groupTasksByDate = (tasks) => {
     const groupedTasks = {
@@ -132,11 +138,14 @@ const TodoList = () => {
       thisMonth: [],
       upcoming:[],
       ungrouped:[],
+      inProgress:[]
     };
   
     tasks.forEach(task => {
       if (task.dueDate === null) {
         groupedTasks.ungrouped.push(task);
+      } else if (isInProgess(task.startDate, task.dueDate)) {
+        groupedTasks.inProgress.push(task);
       } else if (isOverdue(task.dueDate)) {
         groupedTasks.overdue.push(task);
       } else if (isDueToday(task.dueDate)) {
@@ -160,6 +169,7 @@ const TodoList = () => {
       { title: 'This Month', data: groupedTasks.thisMonth },
       { title: 'Upcoming', data: groupedTasks.upcoming },
       { title: 'Ungrouped', data: groupedTasks.ungrouped },
+      { title: 'In Progess', data: groupedTasks.inProgress}
     ].filter(section => section.data.length > 0);
   };
 
@@ -172,7 +182,7 @@ const TodoList = () => {
   const renderItem = ({ item }) => (
     <List.Item
     title = {item.task}
-    description={`Due: ${item.dueDate ? new Date(item.dueDate).toDateString() : ""} ${item.dueDate ? new Date(item.dueDate).toLocaleTimeString() : ""}\n${item.category || 'No Category'}`}
+    description={() => <TaskDescription startDate={item.startDate} dueDate={item.dueDate} category={item.category} />}
     onPress = {() => handleTaskClick(item)}
     right = {() => (
       <IconButton icon ="delete"
