@@ -207,7 +207,7 @@ const TodoList = () => {
     right = {() => (
       <Checkbox
       status={item.completedStatus ? 'checked' : 'unchecked'}
-      onPress={toggleCompletion(item.id)}
+      onPress={()=>toggleCompletion(item.id)}
       />
     )}
     style = {styles.listItem}

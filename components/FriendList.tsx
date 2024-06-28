@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList } from 'react-native'
+import { IconButton, FAB } from 'react-native-paper';
+import AddFriend from '@/components/AddFriend'
 import { supabase } from '@/app/(auth)/client'
+import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 
 const FriendList = () => {
     const[_user, getUser] = useState([]);
     const[_uid, getUserID] = useState("");
     const[_friends, getFriends] = useState([]);
     const[loading, setLoading] = useState(true);
+    const[updateFriends, setUpdateFriends] = useState(false);
+
+    const[modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const loadUser = async () => {
@@ -23,7 +29,6 @@ const FriendList = () => {
             .eq('id', user.id);
             console.log("id: ", data[0].uid);
             getUserID(data[0].uid);
-            setLoading(false);
 
           } catch (error) {
             console.error(error);
@@ -37,32 +42,39 @@ const FriendList = () => {
 
     useEffect(() => {
         const loadFriends = async () => {
-          try{
-            const { data : {friendData}, error } = await supabase.rpc('display_friends', 
-              {auth_id : _user.id})
-            if (error) { throw error; }
-            console.log(friendData);
-            getFriends(friendData);
-            setLoading(false);
-          } catch (error) {
-            console.error(error);
-          }
+          console.log(updateFriends)
+            if (_user.length != 0 || updateFriends) {
+                try{
+                    console.log("load friend: ", _user.id);
+                    const { data, error } = await supabase.rpc('display_friend', {auth_id : _user.id})
+                    if (error) {throw error};
+                    console.log("data: ", data);
+                    getFriends(data);
+                    setLoading(false);
+                    setUpdateFriends(false);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
         };
     
         loadFriends();
-      }, []);
+      }, [_user, updateFriends]);
 
-    const odata = [
+
+   /*const odata = [
     { id: 1, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe1' },
     { id: 2, image: 'https://bootdey.com/img/Content/avatar/avatar2.png', username: 'johndoe2' },
     { id: 3, image: 'https://bootdey.com/img/Content/avatar/avatar3.png', username: 'johndoe3' },
     { id: 4, image: 'https://bootdey.com/img/Content/avatar/avatar4.png', username: 'johndoe4' },
     { id: 5, image: 'https://bootdey.com/img/Content/avatar/avatar1.png', username: 'johndoe5' },
     { id: 6, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
-  ]
+    { id: 7, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
+    { id: 8, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
+    { id: 9, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
+    { id: 10, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
 
-  const [friends, setFriends] = useState(odata)
-  //const { data: { user } } = await supabase.auth.getUser()
+  ]*/
 
   console.log(loading);
   if (loading) {
@@ -73,7 +85,7 @@ const FriendList = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style = {styles.friendPage}>
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
@@ -81,35 +93,54 @@ const FriendList = () => {
             source={{ uri: 'https://bootdey.com/img/Content/avatar/avatar1.png' }}
           />
           <Text style={styles.name}>{_user.user_metadata.username}</Text>
-          <Text style={styles.name}>{_uid}</Text>
+          <Text style={styles.name}>uid: {_uid}</Text>
         </View>
       </View>
 
-      <View style={styles.body}>
+      <View>
         <FlatList
           style={styles.container}
+          scrollEnabled = {true}
           enableEmptySections={true}
-          data={friends}
+          data={_friends}
           keyExtractor={item => item.id}
           renderItem={({ item }) => {
             return (
               <TouchableOpacity>
                 <View style={styles.box}>
-                  <Image style={styles.image} source={{ uri: item.image }} />
                   <Text style={styles.username}>{item.username}</Text>
+                  <Text style={styles.username}>uid: {item.id}</Text>
                 </View>
               </TouchableOpacity>
             )
           }}
         />
+         <FAB style = {styles.fab}
+          small
+          icon = "plus"
+          onPress={() => setModalVisible(true)}/>
+            <AddFriend visible = {modalVisible} 
+            onClose = {() => setModalVisible(false)}
+            _user = {_user}
+            updateFriends = {() => setUpdateFriends(true)}
+            my_uid = {_uid}
+            currentFriends = {_friends}
+            ></AddFriend>
+
       </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  friendPage: {
+    backgroundColor: "#F9DFAD",
+  },
   header: {
-    backgroundColor: '#20B2AA',
+    backgroundColor: 'purple',
+    height: '35%',
+    justifyContent: 'center',
+
   },
   headerContent: {
     padding: 30,
@@ -128,7 +159,7 @@ const styles = StyleSheet.create({
     height: 60,
   },
   name: {
-    fontSize: 22,
+    fontSize: 20,
     color: '#FFFFFF',
     fontWeight: '600',
   },
@@ -137,9 +168,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6E6FA',
   },
   box: {
-    padding: 5,
-    marginTop: 5,
-    marginBottom: 5,
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 10,
+    marginLeft: 10,
+    marginRight: 10,
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     shadowColor: 'black',
@@ -155,6 +188,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
     alignSelf: 'center',
     marginLeft: 10,
+  },
+
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    borderRadius: 28,
+  },
+  container: {
+    height: '65%',
   },
 })
 
