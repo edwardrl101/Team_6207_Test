@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, FlatList, Modal, SectionList} from 'react-native'
+import { Text, View, StyleSheet, FlatList, Modal, SectionList, SafeAreaView, Alert } from 'react-native'
 import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar, Checkbox } from 'react-native-paper';
 import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
@@ -16,21 +16,19 @@ const TodoList = () => {
 
   // Load the tasks from Supabase
   useEffect(() => {
-    const loadTasks = async () => {
-      try{
-        const { data: { user } } = await supabase.auth.getUser()
-        const { data, error } = await supabase.rpc('display_planner', 
-          {auth_id : user.id})
-        if (error) { throw error; }
-        console.log(data);
-        setTasks(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     loadTasks();
   }, []);
+
+  const loadTasks = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.rpc('display_planner', { auth_id: user.id });
+      if (error) { throw error; }
+      setTasks(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   async function handleAddTask (task) {
     try {
@@ -64,7 +62,8 @@ const TodoList = () => {
         setTasks((prevTasks) =>
           prevTasks.map(task => task.id === id ? { ...task, completedStatus: updatedStatus } : task)
         );
-
+        
+        loadTasks();
     } catch (error) {
       console.log(error);
     }
@@ -161,6 +160,7 @@ const TodoList = () => {
     };
   
     tasks.forEach(task => {
+      if(task.completedStatus === false) {
       if (task.startDate === null) {
         groupedTasks.ungrouped.push(task);
       } else if (isInProgress(task.startDate, task.dueDate)) {
@@ -178,6 +178,7 @@ const TodoList = () => {
       } else if (isUpcoming(task.startDate)) {
         groupedTasks.upcoming.push(task);
       }
+    }
     });
   
     return [
@@ -206,7 +207,7 @@ const TodoList = () => {
     right = {() => (
       <Checkbox
       status={item.completedStatus ? 'checked' : 'unchecked'}
-      onPress={() => toggleCompletion(item.id)}
+      onPress={toggleCompletion(item.id)}
       />
     )}
     style = {styles.listItem}
@@ -216,7 +217,7 @@ const TodoList = () => {
   return(
     <PaperProvider>
     
-    <View style = {styles.container}>
+    <SafeAreaView style = {styles.container}>
 
       <List.Section>
         <List.Subheader style = {styles.headerText} >My Active Tasks</List.Subheader>
@@ -258,8 +259,7 @@ const TodoList = () => {
         />
       )}
       
-      </View>
-    
+      </SafeAreaView>
     </PaperProvider>
   )
 }

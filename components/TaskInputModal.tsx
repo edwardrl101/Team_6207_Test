@@ -20,7 +20,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
     const [timeType, setTimeType] = useState(''); // 'start' or 'due'
     const [newCategory, setNewCategory] = useState("");
     const [isEdited, setIsEdited] = useState(false);
-    
+    const [isComplete, setIsComplete] = useState(false);
     const handleAddCategory = () => {
       if (newCategory.trim() && !categories.includes(newCategory)) {
         setCategories([...categories, newCategory]);
@@ -79,7 +79,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
       const dueDateTime = dueDate ? new Date(dueDate) : null;
       const startDateTime = startDate ? new Date(startDate) : null;
       saveTask({ task: text, dueDate: dueDateTime ? dueDateTime.toISOString() : null, 
-        startDate: startDateTime ? startDateTime.toISOString() : null, category: category });
+        startDate: startDateTime ? startDateTime.toISOString() : null, category: category, completedStatus: isComplete });
         setText("");
         setCategory('');
         setStartDate(null);
