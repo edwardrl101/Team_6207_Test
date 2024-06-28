@@ -9,20 +9,19 @@ import { NavigationContainer } from '@react-navigation/native';
 const Tab = createBottomTabNavigator();
 
 const Planner = () => {
-  const load = true
   return (
     <NavigationContainer independent = {true}>
     <Tab.Navigator initialRouteName="TodoList">
       <Tab.Screen 
         name="TodoList" 
-        component={() => TodoList(load)} 
+        component={() => TodoList()} 
         options={{ tabBarLabel: 'Active Tasks',
           headerShown: false
          }} 
       />
       <Tab.Screen 
         name="CompletedTasks" 
-        component={() => CompletedTasks(load)} 
+        component={() => CompletedTasks()} 
         options={{ tabBarLabel: 'Completed Tasks',
           headerShown: false
          }} 
