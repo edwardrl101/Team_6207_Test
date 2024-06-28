@@ -13,11 +13,14 @@ const TodoList = () => {
   const[selectedTask, setSelectedTask] = useState(null);
   const[taskDetailModalVisible, setTaskDetailModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newUpdate, setNewUpdate] = useState(true);
 
   // Load the tasks from Supabase
   useEffect(() => {
-    loadTasks();
-  }, []);
+    if (newUpdate) {
+      loadTasks();
+    }
+  }, [newUpdate]);
 
   const loadTasks = async () => {
     try {
@@ -25,6 +28,7 @@ const TodoList = () => {
       const { data, error } = await supabase.rpc('display_planner', { auth_id: user.id });
       if (error) { throw error; }
       setTasks(data);
+      setNewUpdate(false);
     } catch (error) {
       console.error(error);
     }
@@ -44,7 +48,7 @@ const TodoList = () => {
           categoryname : task.category, 
           task_id : taskid,
           completed_status: task.completedStatus})
-  
+      setNewUpdate(true);
     } catch (error) {
       console.log(error);
     }
@@ -63,7 +67,7 @@ const TodoList = () => {
           prevTasks.map(task => task.id === id ? { ...task, completedStatus: updatedStatus } : task)
         );
         
-        loadTasks();
+        setNewUpdate(true);
     } catch (error) {
       console.log(error);
     }
@@ -75,6 +79,7 @@ const TodoList = () => {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase.rpc('delete_planner', 
         { auth_id : user.id, task_id : id})
+      setNewUpdate(true);
     } catch (error) {
       console.log(error)
     }
@@ -95,6 +100,7 @@ const TodoList = () => {
         prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, start_date : newStartDate, category: newCategory } : task)
     );
       setTaskDetailModalVisible(false);
+      setNewUpdate(true);
     } catch (error) {
       console.log(error);
     }
