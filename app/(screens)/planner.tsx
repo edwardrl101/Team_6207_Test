@@ -14,14 +14,14 @@ const Planner = () => {
     <Tab.Navigator initialRouteName="TodoList">
       <Tab.Screen 
         name="TodoList" 
-        component={() => TodoList()} 
+        component={TodoList} 
         options={{ tabBarLabel: 'Active Tasks',
           headerShown: false
          }} 
       />
       <Tab.Screen 
         name="CompletedTasks" 
-        component={() => CompletedTasks()} 
+        component={CompletedTasks} 
         options={{ tabBarLabel: 'Completed Tasks',
           headerShown: false
          }} 
