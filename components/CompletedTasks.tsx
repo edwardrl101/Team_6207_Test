@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, FlatList, Modal, SectionList, SafeAreaView} from 'react-native'
+import { Text, View, StyleSheet, FlatList, Modal, SectionList, SafeAreaView, Alert} from 'react-native'
 import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar, Checkbox } from 'react-native-paper';
 import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
@@ -31,6 +31,12 @@ const CompletedTasks = () => {
     }
   };
 
+  setTimeout(() => {
+    loadCompletedTasks();
+  }, 200)
+
+
+
   const toggleCompletion = async (id) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -48,6 +54,25 @@ const CompletedTasks = () => {
       console.log(error);
     }
   };
+
+  const handleUndo = (id) => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to undo marking this task as complete?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            toggleCompletion(id)
+          }
+        }
+      ]
+    );
+  }
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -82,7 +107,7 @@ const CompletedTasks = () => {
     right = {() => (
       <Checkbox
       status={item.completedStatus ? 'checked' : 'unchecked'}
-      onPress={() => toggleCompletion(item.id)}
+      onPress={() => handleUndo(item.id)}
       />
     )}
     titleStyle = {styles.completedText}
