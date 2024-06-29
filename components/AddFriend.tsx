@@ -62,11 +62,16 @@ const AddFriend = ({ visible, onClose, _user, updateFriends, my_uid, currentFrie
     const handleAccept = async (frienduid) => {
       console.log(frienduid);
       const {data, error} = await supabase.rpc('accept_friend', 
-        {auth_id : _user.id, _frienduid: frienduid})
+        {my_uid : my_uid, _frienduid: frienduid})
       console.log(error);
-      console.log("accepted");
+      console.log("accept");
       setFRC(true);
       updateFriends();
+    }
+
+    const handleReject = async (frienduid) => {
+      const {data, error} = await supabase.rpc('reject_request', {my_uid : my_uid, _frienduid: frienduid})
+      setFRC(true);
     }
 
     if (loading) {
@@ -122,7 +127,7 @@ const AddFriend = ({ visible, onClose, _user, updateFriends, my_uid, currentFrie
                 <Text style={styles.username}>uid: {item.uid}</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.crossButton} >
+              <TouchableOpacity style={styles.crossButton} onPress = {() => handleReject(item.uid)}>
                 <View>
                   <Ionicons name = "close" size = {20} color = 'white'/>
                 </View>
@@ -143,7 +148,7 @@ const AddFriend = ({ visible, onClose, _user, updateFriends, my_uid, currentFrie
             onClose = {() => setModalVisible(false)}
             my_uid = {my_uid}
             searchResult = {searchDisplay}
-            currentFriends = {currentFriends}>
+            refreshRequests = {() => setFRC(true)}>
           </FriendSearchResult>) : null
         }
 
