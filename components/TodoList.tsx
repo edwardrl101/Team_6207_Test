@@ -1,12 +1,11 @@
-import { Text, View, StyleSheet, FlatList, Modal, SectionList} from 'react-native'
-import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Text, View, StyleSheet, FlatList, Modal, SectionList, SafeAreaView, Alert } from 'react-native'
+import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar, Checkbox } from 'react-native-paper';
 import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
 import TaskDetailModal from '@/components/TaskDetailModal'
 import { differenceInCalendarDays, isToday, isThisWeek, isTomorrow, isThisMonth, isAfter, endOfMonth } from 'date-fns';
 import { supabase } from '@/app/(auth)/client'
-
+import TaskDescription from './styles/TaskDescription';
 
 const TodoList = () => {
   const[modalVisible, setModalVisible] = useState(false);
@@ -17,33 +16,81 @@ const TodoList = () => {
 
   // Load the tasks from Supabase
   useEffect(() => {
-    const loadTasks = async () => {
-      try{
-        const { data: { user } } = await supabase.auth.getUser()
-        const { data, error } = await supabase.rpc('display_planner', 
-          {auth_id : user.id})
-        if (error) { throw error; }
-        console.log(data);
-        setTasks(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     loadTasks();
   }, []);
+
+  const loadTasks = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.rpc('display_planner', { auth_id: user.id });
+      if (error) { throw error; }
+      setTasks(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  setTimeout(() => {
+    loadTasks();
+  }, 200)
 
   async function handleAddTask (task) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       const taskid = Date.now().toString()
       setTasks((prevTasks) => [...prevTasks, { id: taskid, ...task }]);
+
       const { data, error } = await supabase.rpc('insert_planner', 
-        { auth_id : user.id, task : task.task, due_date : task.dueDate, category : task.category, task_id : taskid})
+        { auth_id : user.id, 
+          taskname : task.task, 
+          due_date : task.dueDate, 
+          start_date: task.startDate,
+          categoryname : task.category, 
+          task_id : taskid,
+          completed_status: task.completedStatus})
+  
     } catch (error) {
       console.log(error);
     }
   };
+
+  const toggleCompletion = async (id) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const taskToToggle = tasks.find(task => task.id === id);
+      const updatedStatus = !taskToToggle.completedStatus;
+
+      const { data, error } = await supabase.rpc('toggle_task_completion', 
+        { auth_id: user.id, task_id: id, completed_status: updatedStatus });
+
+        setTasks((prevTasks) =>
+          prevTasks.map(task => task.id === id ? { ...task, completedStatus: updatedStatus } : task)
+        );
+        
+        loadTasks();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleCompleteTask = (id) => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to mark this task as completed?.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            toggleCompletion(id)
+          }
+        }
+      ]
+    );
+  }
 
   async function handleDeleteTask (id) {
     try {
@@ -61,14 +108,14 @@ const TodoList = () => {
     setTaskDetailModalVisible(true);
   };
 
-  async function handleSaveTask (id, newTask, newDueDate, newCategory) {
+  async function handleSaveTask (id, newTask, newDueDate, newStartDate, newCategory) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase.rpc('edit_planner', 
-        { auth_id : user.id, newtask : newTask, due_date : newDueDate, newcategory : newCategory, task_id : id })
+        { auth_id : user.id, newtask : newTask, due_date : newDueDate, start_date : newStartDate, newcategory : newCategory, task_id : id })
   
       setTasks((prevTasks) =>
-        prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, category: newCategory } : task)
+        prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, start_date : newStartDate, category: newCategory } : task)
     );
       setTaskDetailModalVisible(false);
     } catch (error) {
@@ -81,30 +128,30 @@ const TodoList = () => {
   };
 
   // Check if a task is due today
-  const isDueToday = (dueDate) => {
-    return isToday(new Date(dueDate));
+  const isForToday = (startDate) => {
+    return isToday(new Date(startDate));
   }
 
   // Check if a task is due tomorrow
-  const isDueTomorrow = (dueDate) => {
-    return isTomorrow(new Date(dueDate));
+  const isForTomorrow = (startDate) => {
+    return isTomorrow(new Date(startDate));
   };
   
   // Check if a task is due this week (excluding tomorrow)
-  const isDueThisWeek = (dueDate) => {
-    const date = new Date(dueDate);
-    return isThisWeek(date, { weekStartsOn: 1 }) && !isDueTomorrow(dueDate); // Assuming week starts on Monday
+  const isForThisWeek = (startDate) => {
+    const date = new Date(startDate);
+    return isThisWeek(date, { weekStartsOn: 1 }) && !isForTomorrow(startDate); // Assuming week starts on Monday
   };
 
   // Check if a task is due this month (excluding tomorrow and this week)
-  const isDueThisMonth = (dueDate) => {
-    const date = new Date(dueDate);
-    return isThisMonth(date) && !isDueThisWeek(dueDate);
+  const isForThisMonth = (startDate) => {
+    const date = new Date(startDate);
+    return isThisMonth(date) && !isForThisWeek(startDate);
   };
 
   // Check if a task is due next month or later
-  const isUpcoming = (dueDate) => {
-    const date = new Date(dueDate);
+  const isUpcoming = (startDate) => {
+    const date = new Date(startDate);
     return isAfter(date, endOfMonth(new Date()));
   };
 
@@ -114,6 +161,13 @@ const TodoList = () => {
     const date = new Date(dueDate);
     return date < now;
   };
+
+  const isInProgress = (startDate, dueDate) => {
+    const now = new Date();
+    const start = new Date(startDate)
+    const end = new Date(dueDate)
+    return (start <= now && now <= end);
+  }
 
   // Group the tasks by date
   const groupTasksByDate = (tasks) => {
@@ -125,24 +179,29 @@ const TodoList = () => {
       thisMonth: [],
       upcoming:[],
       ungrouped:[],
+      inProgress: [],
     };
   
     tasks.forEach(task => {
-      if (task.dueDate === null) {
+      if(task.completedStatus === false) {
+      if (task.startDate === null) {
         groupedTasks.ungrouped.push(task);
-      } else if (isOverdue(task.dueDate)) {
+      } else if (isInProgress(task.startDate, task.dueDate)) {
+        groupedTasks.inProgress.push(task);
+      }else if (isOverdue(task.dueDate)) {
         groupedTasks.overdue.push(task);
-      } else if (isDueToday(task.dueDate)) {
+      } else if (isForToday(task.startDate)) {
         groupedTasks.today.push(task);
-      } else if (isDueTomorrow(task.dueDate)) {
+      } else if (isForTomorrow(task.startDate)) {
         groupedTasks.tomorrow.push(task);
-      } else if (isDueThisWeek(task.dueDate)) {
+      } else if (isForThisWeek(task.startDate)) {
         groupedTasks.thisWeek.push(task);
-      } else if (isDueThisMonth(task.dueDate)) {
+      } else if (isForThisMonth(task.startDate)) {
         groupedTasks.thisMonth.push(task);
-      } else if (isUpcoming(task.dueDate)) {
+      } else if (isUpcoming(task.startDate)) {
         groupedTasks.upcoming.push(task);
       }
+    }
     });
   
     return [
@@ -153,6 +212,7 @@ const TodoList = () => {
       { title: 'This Month', data: groupedTasks.thisMonth },
       { title: 'Upcoming', data: groupedTasks.upcoming },
       { title: 'Ungrouped', data: groupedTasks.ungrouped },
+      { title: 'In Progress', data: groupedTasks.inProgress},
     ].filter(section => section.data.length > 0);
   };
 
@@ -165,11 +225,12 @@ const TodoList = () => {
   const renderItem = ({ item }) => (
     <List.Item
     title = {item.task}
-    description={`Due: ${item.dueDate ? new Date(item.dueDate).toDateString() : ""} ${item.dueDate ? new Date(item.dueDate).toLocaleTimeString() : ""}\n${item.category || 'No Category'}`}
+    description={() => <TaskDescription startDate={item.startDate} dueDate={item.dueDate} category={item.category} />}
     onPress = {() => handleTaskClick(item)}
     right = {() => (
-      <IconButton icon ="delete"
-      onPress={() => handleDeleteTask(item.id)}
+      <Checkbox
+      status={item.completedStatus ? 'checked' : 'unchecked'}
+      onPress={() => handleCompleteTask(item.id)}
       />
     )}
     style = {styles.listItem}
@@ -179,10 +240,10 @@ const TodoList = () => {
   return(
     <PaperProvider>
     
-    <View style = {styles.container}>
+    <SafeAreaView style = {styles.container}>
 
       <List.Section>
-        <List.Subheader style = {styles.headerText} >My Tasks</List.Subheader>
+        <List.Subheader style = {styles.headerText} >My Active Tasks</List.Subheader>
         <Searchbar
             placeholder="Search"
             onChangeText={handleSearch}
@@ -217,11 +278,11 @@ const TodoList = () => {
         task = {selectedTask}
         onClose = {() => setTaskDetailModalVisible(false)}
         onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
         />
       )}
       
-      </View>
-    
+      </SafeAreaView>
     </PaperProvider>
   )
 }
@@ -240,7 +301,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontWeight: 'bold',
-    marginTop: 30,
+    marginTop: 5,
     fontSize: 25
   },
   overdueText: {

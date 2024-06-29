@@ -1,9 +1,16 @@
-import { View, Text } from 'react-native'
+import React from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import FriendList from '@/components/FriendList'
 
 export default function Friends() {
     return(
-        <View>
-        <Text>Hello there! This is easdmpty for now..</Text>
-        </View>
+        <SafeAreaView>
+        <FriendList/>
+        </SafeAreaView>
     )
 }
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+  });
