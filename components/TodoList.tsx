@@ -13,14 +13,11 @@ const TodoList = () => {
   const[selectedTask, setSelectedTask] = useState(null);
   const[taskDetailModalVisible, setTaskDetailModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newUpdate, setNewUpdate] = useState(true);
 
   // Load the tasks from Supabase
   useEffect(() => {
-    if (newUpdate) {
-      loadTasks();
-    }
-  }, [newUpdate]);
+    loadTasks();
+  }, []);
 
   const loadTasks = async () => {
     try {
@@ -28,11 +25,14 @@ const TodoList = () => {
       const { data, error } = await supabase.rpc('display_planner', { auth_id: user.id });
       if (error) { throw error; }
       setTasks(data);
-      setNewUpdate(false);
     } catch (error) {
       console.error(error);
     }
   };
+
+  setTimeout(() => {
+    loadTasks();
+  }, 200)
 
   async function handleAddTask (task) {
     try {
@@ -48,7 +48,7 @@ const TodoList = () => {
           categoryname : task.category, 
           task_id : taskid,
           completed_status: task.completedStatus})
-      setNewUpdate(true);
+  
     } catch (error) {
       console.log(error);
     }
@@ -67,11 +67,30 @@ const TodoList = () => {
           prevTasks.map(task => task.id === id ? { ...task, completedStatus: updatedStatus } : task)
         );
         
-        setNewUpdate(true);
+        loadTasks();
     } catch (error) {
       console.log(error);
     }
   };
+
+  const handleCompleteTask = (id) => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to mark this task as completed?.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            toggleCompletion(id)
+          }
+        }
+      ]
+    );
+  }
 
   async function handleDeleteTask (id) {
     try {
@@ -79,7 +98,6 @@ const TodoList = () => {
       const { data: { user } } = await supabase.auth.getUser()
       const { data, error } = await supabase.rpc('delete_planner', 
         { auth_id : user.id, task_id : id})
-      setNewUpdate(true);
     } catch (error) {
       console.log(error)
     }
@@ -100,7 +118,6 @@ const TodoList = () => {
         prevTasks.map(task => task.id === id ? { ...task, task: newTask, dueDate: newDueDate, start_date : newStartDate, category: newCategory } : task)
     );
       setTaskDetailModalVisible(false);
-      setNewUpdate(true);
     } catch (error) {
       console.log(error);
     }
@@ -213,7 +230,7 @@ const TodoList = () => {
     right = {() => (
       <Checkbox
       status={item.completedStatus ? 'checked' : 'unchecked'}
-      onPress={()=>toggleCompletion(item.id)}
+      onPress={() => handleCompleteTask(item.id)}
       />
     )}
     style = {styles.listItem}
