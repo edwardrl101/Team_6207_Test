@@ -112,7 +112,14 @@ const AddFriend = ({ visible, onClose, _user, updateFriends, my_uid, currentFrie
 
     </View>
     <View>
-        <Text style={styles.modalHeaderText}>Friend Requests:</Text>
+      <View style = {styles.title}>
+        <Text style = {styles.titleText}>Friend Requests:</Text>
+        <TouchableOpacity style={styles.refresh} onPress = {() => setFRC(true)}>
+          <View>
+            <Ionicons name = "refresh" size = {30} color = 'black'/>
+          </View>
+        </TouchableOpacity>
+      </View>
         <FlatList
           style={styles.container}
           enableEmptySections={true}
@@ -185,8 +192,9 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontWeight: 'bold',
-        marginTop: 30,
-        fontSize: 25
+        marginTop: 10,
+        fontSize: 25,
+        marginLeft: 10,
       },
     search: {
         flex: 1,
@@ -282,10 +290,26 @@ const styles = StyleSheet.create({
         elevation: 2,
         
       },
-
       friendRequestRow:{
         flexDirection: 'row',
         justifyContent: 'space-between'
+      },
+      title: {
+        height: '10%',
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+    
+      },
+      titleText: {
+          fontWeight: 'bold',
+          color: 'black',
+          marginTop: 10,
+          fontSize: 25,
+          marginLeft: 10,
+      },
+      refresh: {
+        marginTop: 10,
+        marginRight: 10,
       },
 })
 

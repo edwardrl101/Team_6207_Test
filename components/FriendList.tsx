@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList } from 'react-native'
-import { IconButton, FAB } from 'react-native-paper';
+import { IconButton, FAB, List } from 'react-native-paper';
 import AddFriend from '@/components/AddFriend'
 import { supabase } from '@/app/(auth)/client'
-import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
+import {Ionicons} from '@expo/vector-icons';
+
 
 const FriendList = () => {
     const[_user, getUser] = useState([]);
@@ -62,20 +63,6 @@ const FriendList = () => {
       }, [_user, updateFriends]);
 
 
-   /*const odata = [
-    { id: 1, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe1' },
-    { id: 2, image: 'https://bootdey.com/img/Content/avatar/avatar2.png', username: 'johndoe2' },
-    { id: 3, image: 'https://bootdey.com/img/Content/avatar/avatar3.png', username: 'johndoe3' },
-    { id: 4, image: 'https://bootdey.com/img/Content/avatar/avatar4.png', username: 'johndoe4' },
-    { id: 5, image: 'https://bootdey.com/img/Content/avatar/avatar1.png', username: 'johndoe5' },
-    { id: 6, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
-    { id: 7, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
-    { id: 8, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
-    { id: 9, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
-    { id: 10, image: 'https://bootdey.com/img/Content/avatar/avatar6.png', username: 'johndoe6' },
-
-  ]*/
-
   console.log(loading);
   if (loading) {
     console.log("load");
@@ -98,6 +85,14 @@ const FriendList = () => {
       </View>
 
       <View>
+        <View style = {styles.title}>
+          <Text style = {styles.titleText}>Friends:</Text>
+          <TouchableOpacity style={styles.refresh} onPress = {() => setUpdateFriends(true)}>
+                <View>
+                  <Ionicons name = "refresh" size = {30} color = 'black'/>
+                </View>
+              </TouchableOpacity>
+        </View>
         <FlatList
           style={styles.container}
           scrollEnabled = {true}
@@ -198,7 +193,24 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   container: {
-    height: '65%',
+    height: '55%',
+  },
+  title: {
+    height: '10%',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+
+  },
+  titleText: {
+      fontWeight: 'bold',
+      color: 'black',
+      marginTop: 10,
+      fontSize: 25,
+      marginLeft: 10,
+  },
+  refresh: {
+    marginTop: 10,
+    marginRight: 10,
   },
 })
 
