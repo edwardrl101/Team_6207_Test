@@ -1,5 +1,7 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { Feather } from '@expo/vector-icons'
+import { useRouter} from 'expo-router'
+import { supabase } from '@/app/(auth)/client'
 
 const sections = [
     {
@@ -27,6 +29,32 @@ const sections = [
 ]
 
 export default function Settings() {
+
+    const router = useRouter();
+    const handleLogout = async () => {
+        Alert.alert(
+            "Log out of HocusFocus?",
+            "Are you sure you want to log out?",
+            [
+              {
+                text: "Cancel",
+                style: "cancel"
+              },
+              {
+                text: "Yes",
+                onPress: async () => {
+                    try{
+                        const { error } = await supabase.auth.signOut()
+                        router.push("/login");
+                    }catch (error){
+                        console.log(error);
+                    } 
+                }
+              }
+            ]
+          );
+    }
+
     return(
         <SafeAreaView style = {styles.container}>
             <View style = {styles.header}>
@@ -49,8 +77,18 @@ export default function Settings() {
                     ))}
                 </View>
             </View>
-
         ))}
+                    <View style = {styles.sectionContainer}>
+                        <Text style = {styles.subheaderText}>Log Out</Text>
+                        <TouchableOpacity style = {styles.sectionBody} onPress={handleLogout}>
+                        <View  style = {styles.listItem}></View>
+                        <View style = {styles.itemWrapper}>
+                            <Feather name = 'lock' color = '#616161' size = {20} style = {styles.iconStyle} ></Feather>
+                        <Text style = {styles.itemText}>Log Out</Text>
+                        </View>
+                    </TouchableOpacity>
+                    </View>
+
         </SafeAreaView>
     )
 }

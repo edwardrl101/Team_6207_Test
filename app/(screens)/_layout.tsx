@@ -1,4 +1,3 @@
-import { Stack } from "expo-router";
 import { useFonts, } from 'expo-font';
 import { AppState, Text } from "react-native";
 import React, {useRef, useState, useEffect} from 'react'
@@ -44,13 +43,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     const handleApp = async nextAppState => {
-     if (nextAppState === 'background') {
-      const { data, error } = await supabase.rpc('is_timer_on', {auth_id : _user.id});
-      console.log("here ", error);
-      if (data) {
-        const { data, error } = await supabase.rpc('stop_timer', {auth_id : _user.id});
-        alert("You have left the app! [you will lose rewards]");
-      }
+      if (nextAppState === 'background') {
+        const { data, error } = await supabase.rpc('is_timer_on', {auth_id : _user.id});
+        if (data) {
+          const { data, error } = await supabase.rpc('stop_timer', {auth_id : _user.id});
+          alert("You have left the app! [you will lose your rewards]");
+        }
       }
 
       appState.current = nextAppState;
@@ -67,7 +65,7 @@ export default function RootLayout() {
     
   }, [_user]); 
 
-  if (loading || _user.length === 0) {
+  if (loading || _user == null || _user.length === 0) {
     return (
       <Text>Loading...</Text>
       );

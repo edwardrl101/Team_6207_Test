@@ -22,7 +22,7 @@
     "@react-native-picker/picker": "^2.7.7",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/drawer": "^6.6.15",
-    "@react-navigation/native": "^6.0.2",
+    "@react-navigation/native": "^6.1.17",
     "@supabase/supabase-js": "^2.43.4",
     "date-fns": "^3.6.0",
     "expo": "~51.0.8",
