@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, StatusBar, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import {Picker} from "@react-native-picker/picker";
+import { Picker } from "@react-native-picker/picker";
+import { supabase } from '@/app/(auth)/client';
+
 
 const screen = Dimensions.get('window');
 
@@ -31,16 +33,29 @@ const createMinArray = length => {
     return arr;
   }
 
-const AVAILABLE_MINUTES = createMinArray(120);
+const AVAILABLE_MINUTES = createMinArray(60);
 const AVAILABLE_SECONDS = createSecArray(60);
 
-export default function Home() {
+export default function Home({route}) {
   const [remainingSecs, setRemainingSecs] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const { mins, secs } = getRemaining(remainingSecs);
   const [selectedMins, setSelectedMins] = useState({"itemValue": "0"});
   const [selectedSecs, setSelectedSecs] = useState({"itemValue": "0"});
+  
+  const { user } = route.params;
   let interval = null;
+
+
+  const checkTimer = async () =>  {
+    try {
+      const { data, error } = await supabase.rpc('is_timer_on', { auth_id: user.id });
+      setIsActive(data);
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
 
   useEffect(() => {
     interval = null;
@@ -48,6 +63,7 @@ export default function Home() {
       interval = setInterval(() => {
         setRemainingSecs(prevSecs => prevSecs - 1);
       }, 1000);
+      checkTimer();
       getRemaining(remainingSecs);
       if(remainingSecs === 0) {
         endTimer();
@@ -58,15 +74,17 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [isActive, remainingSecs]);
 
-  const startTimer = () => {
-    setRemainingSecs(parseInt((selectedMins.itemValue).toString(), 10) * 60 + parseInt((selectedSecs.itemValue).toString(), 30))
+  const startTimer = async () => {
+    let duration = parseInt((selectedMins.itemValue), 10) * 60 + parseInt((selectedSecs.itemValue), 10)
+    const {data, error} = await supabase.rpc('start_timer', {auth_id : user.id, _duration: duration});
+    setRemainingSecs(duration)
     setIsActive(true);
   } 
 
-  const endTimer = () => {
+  const endTimer = async () => {
     setRemainingSecs(0);
     setIsActive(false);
-
+    const {data, error} = await supabase.rpc('stop_timer', {auth_id : user.id})
     clearInterval(interval);
     interval = null;
     setRemainingSecs(0);
