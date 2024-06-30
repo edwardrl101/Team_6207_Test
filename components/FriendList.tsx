@@ -48,7 +48,7 @@ const FriendList = () => {
                 try{
                     console.log("load friend: ", _user.id);
                     const { data, error } = await supabase.rpc('display_friend', {auth_id : _user.id})
-                    if (error) {throw error};
+                    console.log(error)
                     console.log("data: ", data);
                     getFriends(data);
                     setLoading(false);
