@@ -32,7 +32,7 @@ const TaskDetailModal = ({ visible, onClose, task, onSave, onDelete }) => {
       }
       setCategory(task.category);
     }
-  }, []);
+  }, [task]);
 
   const handleAddCategory = () => {
     if (newCategory.trim() && !categories.includes(newCategory)) {
