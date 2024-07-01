@@ -166,7 +166,10 @@ const onTimeChange = (event, selectedTime) => {
         <ScrollView>
         <View style={styles.modalHeader}>
         <Text style={styles.modalHeaderText}>Edit Task</Text>
-        <BackArrowTwo onClose = {() => handleClose()}/>
+        <IconButton style = {styles.modalCloseButton}
+        icon = "arrow-left"
+        size = {30}
+        onPress={onClose}></IconButton>
           <IconButton
           icon = "delete"
           size = {30}
