@@ -6,6 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import CalendarButton from './styles/CalendarButton';
 import ClockButton from './styles/ClockButton';
 import ResetButton from './styles/ResetButton';
+import BackArrowTwo from './styles/BackArrowTwo';
 
 const TaskInputModal = ({ visible, onClose, saveTask }) => {
 
@@ -112,7 +113,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
       } else {
         const currentTime = selectedTime || (dateType === 'start' ? startDate : dueDate);
         setShowTimePicker(false);
-        if (dateType === 'start') {
+        if (timeType === 'start') {
         setStartDate(currentTime);
       } else {
         setDueDate(currentTime);
@@ -127,15 +128,12 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
       visible = {visible}
       onRequestClose={handleClose}>
 
-        <SafeAreaView style = {{backgroundColor: 'yellow', flex: 1}}>
+        <SafeAreaView style = {{backgroundColor: '#F9DFAD', flex: 1}}>
         <ScrollView>
         <View style = {styles.modalHeader}>
         <Text style = {styles.modalHeaderText}> Hello! </Text>
         </View>
-        <IconButton style = {styles.modalCloseButton}
-        icon = "arrow-left"
-        size = {30}
-        onPress={handleClose}></IconButton>
+        <BackArrowTwo onClose = {() => handleClose()}/>
 
         <Text style = {styles.subheaderText}>What do you want to do?</Text>
         <TextInput style = {styles.textInput}
@@ -154,7 +152,7 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
             
             <CalendarButton onClose = {() => {setDateType('start'); setShowDatePicker(true)}}/>
 
-          {startDate && (<ResetButton onClose = {() => setStartDate(null)}/>
+          {startDate && (<ResetButton onClose = {() => {setStartDate(null) ; setDueDate(null)}}/>
             )}
 
         </View>
@@ -265,7 +263,7 @@ const styles = StyleSheet.create({
         color: 'white',
       },
     modalHeader: {
-        backgroundColor: '#F3E5F5', // light gray background
+        backgroundColor: '#F3E5F5', 
         padding: 20,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
@@ -298,13 +296,13 @@ const styles = StyleSheet.create({
     textInput:{
       marginHorizontal: 25,
       marginBottom: 20,
-      backgroundColor: 'white',  // White background for list items
+      backgroundColor: 'white', 
       borderRadius: 20,
       marginVertical: 10,
       marginHorizontal: 20,
       paddingVertical: 10,
       paddingHorizontal: 15,
-      shadowColor: '#000000',  // Black shadow color
+      shadowColor: '#000000', 
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 1,

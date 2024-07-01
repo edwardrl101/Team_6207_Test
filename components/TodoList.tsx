@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, FlatList, Modal, SectionList, SafeAreaView, Alert } from 'react-native'
+import { Text, View, StyleSheet, FlatList, Modal, SectionList, SafeAreaView, Alert, ScrollView } from 'react-native'
 import { Provider as PaperProvider, Appbar, FAB, List, IconButton, Searchbar, Checkbox } from 'react-native-paper';
 import React, { useState, useEffect } from 'react'
 import TaskInputModal from '@/components/TaskInputModal'
@@ -29,10 +29,6 @@ const TodoList = () => {
       console.error(error);
     }
   };
-
-  setTimeout(() => {
-    loadTasks();
-  }, 200)
 
   async function handleAddTask (task) {
     try {
@@ -162,6 +158,7 @@ const TodoList = () => {
     return date < now;
   };
 
+  // Check if a task is in progress 
   const isInProgress = (startDate, dueDate) => {
     const now = new Date();
     const start = new Date(startDate)
@@ -242,6 +239,8 @@ const TodoList = () => {
     
     <SafeAreaView style = {styles.container}>
 
+      <ScrollView>
+
       <List.Section>
         <List.Subheader style = {styles.headerText} >My Active Tasks</List.Subheader>
         <Searchbar
@@ -262,6 +261,7 @@ const TodoList = () => {
         />
         
       </List.Section>
+      </ScrollView>
 
     <FAB style = {styles.fab}
     small
@@ -290,7 +290,7 @@ const TodoList = () => {
 const styles = StyleSheet.create({
   container: {
   flex: 1,
-  backgroundColor: '#F3E5F5'
+  backgroundColor: '#F9DFAD'
   },
   fab: {
     position: 'absolute',
@@ -302,7 +302,8 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: 'bold',
     marginTop: 5,
-    fontSize: 25
+    fontSize: 25,
+    color: 'purple'
   },
   overdueText: {
     fontWeight: 'bold',
@@ -320,13 +321,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   listItem: {
-    backgroundColor: '#E1BEE7',  // White background for list items
+    backgroundColor: '#E1BEE7',
     borderRadius: 20,
     marginVertical: 10,
     marginHorizontal: 20,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    shadowColor: '#000000',  // Black shadow color
+    shadowColor: '#000000',  
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,
     shadowRadius: 1,
@@ -335,6 +336,9 @@ const styles = StyleSheet.create({
   sectionList: {
     marginBottom: 20
   },
+  searchBar: {
+    backgroundColor: 'transparent'
+  }
 })
 
 export default TodoList

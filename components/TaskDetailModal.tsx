@@ -6,6 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import CalendarButton from './styles/CalendarButton';
 import ClockButton from './styles/ClockButton';
 import ResetButton from './styles/ResetButton';
+import BackArrowTwo from './styles/BackArrowTwo';
 
 const TaskDetailModal = ({ visible, onClose, task, onSave, onDelete }) => {
   const [text, setText] = useState(task ? task.task : '');
@@ -165,12 +166,7 @@ const onTimeChange = (event, selectedTime) => {
         <ScrollView>
         <View style={styles.modalHeader}>
         <Text style={styles.modalHeaderText}>Edit Task</Text>
-          <IconButton
-            icon="arrow-left"
-            size={30}
-            onPress={handleClose}
-            style={styles.modalCloseButton}
-          />
+        <BackArrowTwo onClose = {() => handleClose()}/>
           <IconButton
           icon = "delete"
           size = {30}
@@ -196,7 +192,7 @@ const onTimeChange = (event, selectedTime) => {
             
             <CalendarButton onClose = {() => {setDateType('start'); setShowDatePicker(true)}}/>
 
-          {startDate && (<ResetButton onClose = {() => setStartDate(null)}/>
+          {startDate && (<ResetButton onClose = {() => {setStartDate(null) ; setDueDate(null)}}/>
             )}
         </View>
 
@@ -220,6 +216,9 @@ const onTimeChange = (event, selectedTime) => {
             editable={false}
           />
           <CalendarButton onClose = {() => {setDateType('due'); setShowDatePicker(true)}}/>
+          {dueDate && (<ResetButton
+            onClose={() => setDueDate(null)}
+          />)}
         </View>
 
         {dueDate && (<View style={styles.dateInputContainer}>
@@ -293,7 +292,7 @@ export default TaskDetailModal;
 const styles = StyleSheet.create({
   modalContainer: {
         flex: 1,
-        backgroundColor: 'white'
+        backgroundColor: '#F9DFAD'
       },
     modalCloseButton: {
         position: 'absolute',
@@ -303,7 +302,7 @@ const styles = StyleSheet.create({
       },
     modalHeader: {
         flexDirection: 'row',
-        backgroundColor: '#F3E5F5', // light gray background
+        backgroundColor: '#F3E5F5', 
         padding: 2,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
