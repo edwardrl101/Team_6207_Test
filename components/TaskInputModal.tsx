@@ -133,7 +133,10 @@ const TaskInputModal = ({ visible, onClose, saveTask }) => {
         <View style = {styles.modalHeader}>
         <Text style = {styles.modalHeaderText}> Hello! </Text>
         </View>
-        <BackArrowTwo onClose = {() => handleClose()}/>
+        <IconButton style = {styles.modalCloseButton}
+        icon = "arrow-left"
+        size = {30}
+        onPress={onClose}></IconButton>
 
         <Text style = {styles.subheaderText}>What do you want to do?</Text>
         <TextInput style = {styles.textInput}
@@ -296,13 +299,13 @@ const styles = StyleSheet.create({
     textInput:{
       marginHorizontal: 25,
       marginBottom: 20,
-      backgroundColor: 'white', 
+      backgroundColor: 'white',  // White background for list items
       borderRadius: 20,
       marginVertical: 10,
       marginHorizontal: 20,
       paddingVertical: 10,
       paddingHorizontal: 15,
-      shadowColor: '#000000', 
+      shadowColor: '#000000',  // Black shadow color
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 1,
