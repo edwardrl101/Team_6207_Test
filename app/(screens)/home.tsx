@@ -73,7 +73,7 @@ export default function Home({route}) {
         return;
       } 
       setIsActive(false);
-      
+
     } catch (error) {
       console.log(error);
     }
@@ -108,6 +108,7 @@ export default function Home({route}) {
     setRemainingSecs(0);
     setIsActive(false);
     const {data, error} = await supabase.rpc('stop_timer', {auth_id : user.id})
+    alert('Congratulations! [you will earn some rewards]')
     clearInterval(interval);
     interval = null;
     setRemainingSecs(0);
