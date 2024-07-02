@@ -46,11 +46,34 @@ export default function Home({route}) {
   const { user } = route.params;
   let interval = null;
 
+  const isFail = async () => {
+    const { data, error } = await supabase.rpc('is_timer_failed', { auth_id: user.id }); {
+      return data;
+    }
+  }
+
+  const isOn = async () => {
+    const { data, error } = await supabase.rpc('is_timer_on', { auth_id: user.id }); {
+      return data;
+    }
+  }
 
   const checkTimer = async () =>  {
     try {
-      const { data, error } = await supabase.rpc('is_timer_on', { auth_id: user.id });
-      setIsActive(data);
+      
+      if (await isFail()) {
+        stopTimer();
+        setIsActive(false);
+        return;
+        
+      } 
+
+      if (await isOn()) {
+        setIsActive(true);
+        return;
+      } 
+      setIsActive(false);
+      
     } catch (error) {
       console.log(error);
     }
@@ -88,7 +111,16 @@ export default function Home({route}) {
     clearInterval(interval);
     interval = null;
     setRemainingSecs(0);
+  }
+
+  const stopTimer = async () => {
+    setRemainingSecs(0);
     setIsActive(false);
+    const {data, error} = await supabase.rpc('stop_timer', {auth_id : user.id})
+    alert('The timer has stopped! [you will lose your rewards]')
+    clearInterval(interval);
+    interval = null;
+    setRemainingSecs(0);
   }
 
   return (
@@ -138,7 +170,7 @@ export default function Home({route}) {
           {
             isActive ? (
               <TouchableOpacity 
-                onPress={endTimer}
+                onPress={stopTimer}
                 style={[styles.button, styles.buttonStop]}
                 >
                   <Text style={[styles.buttonText, styles.buttonTextStop]}>Stop</Text>
@@ -165,36 +197,29 @@ const styles = StyleSheet.create({
   },
   button: {
       borderWidth: 10,
-      borderColor: '#B9AAFF',
+      borderColor: '#f9ebd6',
       width: screen.width / 2,
       height: screen.width / 2,
       borderRadius: screen.width / 2,
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      marginTop: 100,
   },
   buttonText: {
       fontSize: 45,
-      color: '#B9AAFF'
+      color: '#f9ebd6'
   },
   timerText: {
       color: '#fff',
       fontSize: 90,
-      marginBottom: 20
-  },
-  buttonReset: {
-      marginTop: 20,
-      borderColor: "#FF851B"
-  },
-  buttonTextReset: {
-    color: "#FF851B"
   },
 
   buttonStop: {
-    borderColor: "#FF851B"
+    borderColor: "#f6ac6c"
   },
 
   buttonTextStop: {
-    color: "#FF851B"
+    color: "#f6ac6c"
   },
 
   picker: {

@@ -43,11 +43,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     const handleApp = async nextAppState => {
-      if (nextAppState === 'background') {
+      if (nextAppState === 'background' && _user !== null && _user.length !== 0) {
         const { data, error } = await supabase.rpc('is_timer_on', {auth_id : _user.id});
         if (data) {
-          const { data, error } = await supabase.rpc('stop_timer', {auth_id : _user.id});
-          alert("You have left the app! [you will lose your rewards]");
+          const { data, error } = await supabase.rpc('fail_timer', {auth_id: _user.id})
         }
       }
 
@@ -65,7 +64,7 @@ export default function RootLayout() {
     
   }, [_user]); 
 
-  if (loading || _user == null || _user.length === 0) {
+  if (loading || _user === null || _user.length === 0) {
     return (
       <Text>Loading...</Text>
       );
