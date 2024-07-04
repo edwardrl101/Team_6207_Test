@@ -8,6 +8,7 @@ import Notes from '@/app/(screens)/notes'
 import Planner from '@/app/(screens)/planner'
 import Friends from '@/app/(screens)/friends'
 import Settings from '@/app/(screens)/settings'
+import Profile from '@/app/(screens)/profile'
 
 const Drawer = createDrawerNavigator();
 
@@ -76,6 +77,7 @@ export default function RootLayout() {
      <Drawer.Screen name="Notes" component={Notes}/>
      <Drawer.Screen name="Planner" component={Planner}/>
      <Drawer.Screen name="Friend" component={Friends}/>
+     <Drawer.Screen name="Profile" component={Profile}/>
      <Drawer.Screen name="Settings" component={Settings}/>
   </Drawer.Navigator>
   );

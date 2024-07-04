@@ -12,9 +12,9 @@ export default function Profile() {
       <View style = {styles.profileContainer}>
         <Image source={{ uri: 'https://bootdey.com/img/Content/avatar/avatar1.png' }} style = {styles.avatar}></Image>
         <Text style = {styles.username} >
-            TestUser
+            Username
         </Text>
-        <Text style = {styles.uid}>uid: 00007</Text>
+        <Text style = {styles.uid}>uid: userid</Text>
       </View>
       </View>
 
