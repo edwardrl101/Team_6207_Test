@@ -3,6 +3,43 @@ import { SafeAreaView, Button, StyleSheet, Text, View, Image } from 'react-nativ
 import { supabase } from '@/app/(auth)/client'
 
 export default function Profile() {
+    const[_user, getUser] = useState([]);
+    const[_uid, getUserID] = useState("");
+    const[loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadUser = async () => {
+          try{
+
+            console.log("here");
+            const { data: { user } } = await supabase.auth.getUser()
+            console.log("username: ", user.user_metadata.username);
+            getUser(user);
+
+            const { data, error } = await supabase
+            .from('profile')
+            .select('uid')
+            .eq('id', user.id);
+            console.log("id: ", data[0].uid);
+            getUserID(data[0].uid);
+            setLoading(false);
+
+          } catch (error) {
+            console.error(error);
+          }
+        };
+    
+        loadUser();
+    }, []);        
+        console.log("outside: ", _user);
+
+        console.log(loading);
+  if (loading) {
+    console.log("load");
+    return (
+        <Text>Loading...</Text>
+    )
+  }
 
   return(
       <View style = {styles.container}>
@@ -12,9 +49,9 @@ export default function Profile() {
       <View style = {styles.profileContainer}>
         <Image source={{ uri: 'https://bootdey.com/img/Content/avatar/avatar1.png' }} style = {styles.avatar}></Image>
         <Text style = {styles.username} >
-            Username
+            {_user.user_metadata.username}
         </Text>
-        <Text style = {styles.uid}>uid: userid</Text>
+        <Text style = {styles.uid}>uid: {_uid}</Text>
       </View>
       </View>
 
