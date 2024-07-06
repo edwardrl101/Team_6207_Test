@@ -18,6 +18,6 @@ This is the GitHub Repository of our team, HocusFocus (Team 6207)
 
 6. In the terminal, type in the command `npm run android` to open the app in Android or `npm run ios` to open the app in iOS.
 
-7. Run the app and try out the sign in/register feature with authentication.
+7. Run the app and try out the implemented features as described in the Google Docs README.
 
  Thanks!
